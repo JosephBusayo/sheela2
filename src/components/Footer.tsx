@@ -1,0 +1,168 @@
+"use client"
+
+import React, { useState } from 'react';
+import { Loader2, Send } from 'lucide-react';
+import Image from 'next/image';
+import { Button } from './ui/button';
+
+const Footer: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    
+    setIsSubmitting(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsSubmitting(false);
+    setEmail('');
+    // You can add toast notification here
+  };
+
+  const categories = [
+    { name: 'Women', href: '/women' },
+    { name: 'Men', href: '/men' },
+    { name: 'Kids', href: '/kids' },
+    { name: 'Unisex', href: '/unisex' },
+    { name: 'Fabrics', href: '/fabrics' }
+  ];
+
+  const quickLinks = [
+    { name: 'About Us', href: '/about' },
+    { name: 'Help', href: '/help' },
+    { name: 'T&Cs', href: '/terms' },
+    { name: 'Shipping', href: '/shipping' }
+  ];
+
+  const socialLinks = [
+    { name: 'Instagram', href: '#', icon: 'instagram' },
+    { name: 'Facebook', href: '#', icon: 'facebook' },
+    { name: 'TikTok', href: '#', icon: 'tiktok' }
+  ];
+
+
+
+  return (
+   
+      <footer className="w-full mx-auto my-6 px-4 sm:px-6 lg:px-8 py-16 bg-bt-green justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 justify-between">
+          
+          {/* Brand Section */}
+          <div className="lg:col-span-1 gap-2">
+            <Image src="/images/sheela.png" alt='logo' width={120} height={50} />
+            <p className="text-gray-300 my-6 text-lg font-normal ">
+              Seamless orders. Unique designs. Fashion your way.
+            </p>
+            <Button className="bg-white text-bt-green px-6 py-2 hover:bg-gray-100 transition-colors duration-200 font-medium cursor-pointer border-none shadow-none rounded-none" >
+              PLACE YOUR ORDER
+            </Button>
+          </div>
+
+          {/* Categories */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 text-gray-200">
+              Categories
+            </h3>
+            <ul className="space-y-3">
+              {categories.map((category) => (
+                <li key={category.name}>
+                  <a
+                    href={category.href}
+                    className="text-gray-300 hover:text-white transition-colors duration-200"
+                  >
+                    {category.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 text-gray-200">
+              Quick Links
+            </h3>
+            <ul className="space-y-3">
+              {quickLinks.map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    className="text-gray-300 hover:text-white transition-colors duration-200"
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Socials */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 text-gray-200">
+              Socials
+            </h3>
+            <ul className="space-y-3">
+              {socialLinks.map((social) => (
+                <li key={social.name}>
+                  <a
+                    href={social.href}
+                    className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors duration-200"
+                  >
+                    {/* <SocialIcon icon={social.icon} /> */}
+                    <span>{social.name}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Newsletter and Footer Bottom */}
+        <div className="mt-12 pt-8 border-t border-gray-600">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-6 lg:space-y-0">
+            
+            {/* Copyright */}
+            <div className="text-sm text-gray-300">
+              © {new Date().getFullYear()} SHEELA ALL RIGHTS RESERVED.
+            </div>
+
+            {/* Newsletter */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <span className="text-sm font-medium whitespace-nowrap text-gray-300">
+                JOIN OUR NEWSLETTER
+              </span>
+              <form onSubmit={handleNewsletterSubmit} className="w-full sm:w-auto">
+                <div className="flex items-center bg-white pr-1">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter Your Email"
+                    className="bg-transparent text-gray-900 px-4 py-2 flex-1 focus:outline-none"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-bt-green text-white px-4 py-2 hover:bg-bt-green/90 transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Subscribe to newsletter"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="w-4 h-4 animate-spin"/>
+                    ) : (
+                      <Button className="w-4 h-5 cursor-pointer bg-bt-green" >Send</Button>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </footer>
+ 
+  );
+};
+
+export default Footer;
