@@ -7,7 +7,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'sm001',
     name: 'SMOO1 - SENATOR',
-    price: 36000,
+    price: '36000',
     originalPrice: 40000,
     images: [
       '/images/senator-1.png',
@@ -22,7 +22,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'sw001',
     name: 'SWO01 - ADIRE',
-    price: 35000,
+    price: '35000',
     originalPrice: 39000,
     images: [
       '/images/adire-1.jpg',
@@ -37,7 +37,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'sw002',
     name: 'SWO02 - ANKARA',
-    price: 33000,
+    price: '33000',
     images: [
       '/images/ankara-1.jpg',
       '/images/ankara-2.jpg',
@@ -51,7 +51,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'sk001',
     name: 'Traditional Kids Agbada',
-    price: 18000,
+    price: '18000',
     originalPrice: 22000,
     images: [
       '/images/kids-agbada-1.jpg',
@@ -65,7 +65,7 @@ export const sampleProducts: Product[] = [
   {
     id: 'su001',
     name: 'Unisex Dashiki Shirt',
-    price: 15000,
+    price: '15000',
     images: [
       '/images/dashiki-1.jpg',
       '/images/dashiki-2.jpg',

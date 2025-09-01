@@ -23,14 +23,24 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart } = useStore();
+  
+  const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore();
+  const isInFavorites = isFavorite(product.id);
+
 
   const handleAddToCart = () => {
     addToCart(product);
   };
+  const handleToggleFavorite = () => {
+    if (isInFavorites) {
+      removeFromFavorites(product.id);
+    } else {
+      addToFavorites(product);
+    }
+  };
 
   return (
-    <Card className="w-[448px]  mx-4 mb-6 shadow-none rounded-none border-0 gap-1">
+    <Card className="lg:w-[455px] sm:w-[360px] md:w-[445px]   mx-4 mb-6 shadow-none rounded-none border-0 gap-1">
       <CardHeader className="relative p-0 mb-0">
         <Swiper
           modules={[Navigation, Pagination]}
@@ -51,24 +61,27 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </SwiperSlide>
           ))}
         </Swiper>
-        <div className="absolute bottom-2 right-2 mb-2 flex flex-row items-center bg-white border-1 border-black z-10">
-          <div className="p-2">
-            <Image
+        <div className="absolute bottom-2 right-2 mb-2 flex flex-row items-center bg-white border-1 border-black/30 z-10">
+          <div className="p-2" onClick={handleToggleFavorite}>
+            <Heart
               className="w-6 h-6 cursor-pointer"
-              src="/heart.svg"
-              alt="heart"
-              width={24}
-              height={24}
+              fill={isInFavorites ? "red" : "none"}
+              stroke={isInFavorites ? "red" : "currentColor"}
+              aria-label={
+                isInFavorites ? "Remove from favorites" : "Add to favorites"
+              }
             />
           </div>
           <div className="border-l border-gray-300 h-6"></div>
           <div className="p-2">
             <Image
               src="/bag-2.svg"
-              alt="heart icon"
+              alt="cart icon"
               className="cursor-pointer"
               width={24}
               height={24}
+              onClick={handleAddToCart}
+             
             />
           </div>
         </div>

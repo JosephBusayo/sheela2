@@ -1,0 +1,190 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "sqlite" for development
+  url      = env("DATABASE_URL")
+}
+
+// User Management (Clerk Integration)
+model User {
+  id        String   @id @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  phone     String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // User Data
+  cartItems  CartItem[]
+  favorites  Favorite[]
+  orders     Order[]
+  addresses  Address[]
+
+  @@map("users")
+}
+
+// Product Management
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       String
+  originalPrice Float?
+  category    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Product Details
+  images      ProductImage[]
+  sizes       ProductSize[]
+  colors      ProductColor[]
+  cartItems   CartItem[]
+  favorites   Favorite[]
+  orderItems  OrderItem[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int    @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model ProductSize {
+  id        String @id @default(cuid())
+  size      String
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_sizes")
+}
+
+model ProductColor {
+  id        String @id @default(cuid())
+  color     String
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_colors")
+}
+
+// Shopping Cart
+model CartItem {
+  id            String   @id @default(cuid())
+  userId        String
+  productId     String
+  quantity      Int      @default(1)
+  selectedSize  String?
+  selectedColor String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, selectedSize, selectedColor])
+  @@map("cart_items")
+}
+
+// Favorites/Wishlist
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+// Order Management
+model Order {
+  id          String      @id @default(cuid())
+  userId      String
+  orderNumber String      @unique
+  status      String      @default("PENDING")
+  total       Float
+  subtotal    Float
+  
+  shipping    Float       @default(0)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        OrderItem[]
+  address      Address?    @relation(fields: [addressId], references: [id])
+  addressId    String?
+  whatsappSent Boolean     @default(false)
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String @id @default(cuid())
+  orderId       String
+  productId     String
+  quantity      Int
+  price         Float
+  selectedSize  String?
+  selectedColor String?
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+// Address Management
+model Address {
+  id       String @id @default(cuid())
+  userId   String
+  name     String
+  phone    String
+  address1 String
+  address2 String?
+  city     String
+  state    String
+  country  String  @default("Nigeria")
+  zipCode  String?
+  isDefault Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@map("addresses")
+}
+
+// Enums
+enum Category {
+  WOMEN
+  MEN
+  KIDS
+  UNISEX
+  FABRICS
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}

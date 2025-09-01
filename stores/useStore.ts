@@ -1,4 +1,4 @@
-
+// stores/useStore.ts - Updated with Clerk integration
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -21,11 +21,16 @@ export interface CartItem extends Product {
 }
 
 interface StoreState {
+  // Authentication state
+  isLoggedIn: boolean;
+  userId: string | null;
+  setAuthState: (isLoggedIn: boolean, userId: string | null) => void;
+
   // Cart functionality
   cartItems: CartItem[];
   addToCart: (product: Product, size?: string, color?: string) => void;
-  removeFromCart: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  removeFromCart: (productId: string, size?: string, color?: string) => void;
+  updateQuantity: (productId: string, quantity: number, size?: string, color?: string) => void;
   clearCart: () => void;
   
   // Favorites functionality
@@ -34,88 +39,257 @@ interface StoreState {
   removeFromFavorites: (productId: string) => void;
   isFavorite: (productId: string) => boolean;
   
+  // Database sync
+  syncWithDatabase: () => Promise<void>;
+  migrateLocalData: () => Promise<void>;
+  
   // Computed values
   cartCount: () => number;
   favoritesCount: () => number;
   cartTotal: () => number;
+
+  // Order functionality
+  createOrder: (addressId?: string, notes?: string) => Promise<{ success: boolean; whatsappLink?: string; error?: string }>;
 }
 
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
+      isLoggedIn: false,
+      userId: null,
+
+      setAuthState: (isLoggedIn, userId) => {
+        const previousState = get();
+        set({ isLoggedIn, userId });
+        
+        // Auto-migrate local data when user logs in
+        if (isLoggedIn && userId && !previousState.isLoggedIn) {
+          get().migrateLocalData();
+        }
+      },
+
       cartItems: [],
       favorites: [],
 
-      addToCart: (product, size, color) => {
-        set((state) => {
-          const existingItem = state.cartItems.find(
-            (item) => item.id === product.id && item.selectedSize === size && item.selectedColor === color
-          );
+      addToCart: async (product, size, color) => {
+        const state = get();
+        
+        if (state.isLoggedIn && state.userId) {
+          // Add to database
+          try {
+            const response = await fetch('/api/cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: product.id,
+                quantity: 1,
+                selectedSize: size,
+                selectedColor: color,
+              }),
+            });
 
-          if (existingItem) {
-            return {
-              cartItems: state.cartItems.map((item) =>
-                item.id === product.id && item.selectedSize === size && item.selectedColor === color
-                  ? { ...item, quantity: item.quantity + 1 }
-                  : item
-              ),
-            };
+            if (response.ok) {
+              // Refresh cart from database
+              await get().syncWithDatabase();
+            } else {
+              throw new Error('Failed to add to cart');
+            }
+          } catch (error) {
+            console.error('Failed to add to cart:', error);
+            // Fallback to local storage
           }
+        } else {
+          // Add to local state
+          set((state) => {
+            const existingItemIndex = state.cartItems.findIndex(
+              (item) => item.id === product.id && item.selectedSize === size && item.selectedColor === color
+            );
 
-          return {
-            cartItems: [
-              ...state.cartItems,
-              { ...product, quantity: 1, selectedSize: size, selectedColor: color },
-            ],
-          };
-        });
+            if (existingItemIndex >= 0) {
+              const updatedItems = [...state.cartItems];
+              updatedItems[existingItemIndex] = {
+                ...updatedItems[existingItemIndex],
+                quantity: updatedItems[existingItemIndex].quantity + 1
+              };
+              return { cartItems: updatedItems };
+            }
+
+            return {
+              cartItems: [
+                ...state.cartItems,
+                { ...product, quantity: 1, selectedSize: size, selectedColor: color },
+              ],
+            };
+          });
+        }
       },
 
-      removeFromCart: (productId) => {
-        set((state) => ({
-          cartItems: state.cartItems.filter((item) => item.id !== productId),
-        }));
+      removeFromCart: async (productId, size, color) => {
+        const state = get();
+        
+        if (state.isLoggedIn && state.userId) {
+          try {
+            const queryParams = new URLSearchParams({
+              productId,
+              ...(size && { size }),
+              ...(color && { color })
+            });
+
+            const response = await fetch(`/api/cart?${queryParams}`, {
+              method: 'DELETE',
+            });
+
+            if (response.ok) {
+              await get().syncWithDatabase();
+            }
+          } catch (error) {
+            console.error('Failed to remove from cart:', error);
+          }
+        } else {
+          set((state) => ({
+            cartItems: state.cartItems.filter((item) => 
+              !(item.id === productId && item.selectedSize === size && item.selectedColor === color)
+            ),
+          }));
+        }
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: async (productId, quantity, size, color) => {
         if (quantity <= 0) {
-          get().removeFromCart(productId);
+          get().removeFromCart(productId, size, color);
           return;
         }
 
-        set((state) => ({
-          cartItems: state.cartItems.map((item) =>
-            item.id === productId ? { ...item, quantity } : item
-          ),
-        }));
+        const state = get();
+        
+        if (state.isLoggedIn && state.userId) {
+          try {
+            const response = await fetch('/api/cart', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId,
+                quantity,
+                selectedSize: size,
+                selectedColor: color,
+              }),
+            });
+
+            if (response.ok) {
+              await get().syncWithDatabase();
+            }
+          } catch (error) {
+            console.error('Failed to update quantity:', error);
+          }
+        } else {
+          set((state) => ({
+            cartItems: state.cartItems.map((item) =>
+              item.id === productId && item.selectedSize === size && item.selectedColor === color
+                ? { ...item, quantity }
+                : item
+            ),
+          }));
+        }
       },
 
-      clearCart: () => {
+      clearCart: async () => {
+        const state = get();
+        
+        if (state.isLoggedIn && state.userId) {
+          try {
+            await fetch('/api/cart', { method: 'DELETE' });
+          } catch (error) {
+            console.error('Failed to clear cart:', error);
+          }
+        }
+        
         set({ cartItems: [] });
       },
 
-      addToFavorites: (product) => {
-        set((state) => {
-          const isAlreadyFavorite = state.favorites.some((fav) => fav.id === product.id);
-          
-          if (isAlreadyFavorite) {
-            return state; // Don't add duplicates
-          }
+      addToFavorites: async (product) => {
+        const state = get();
+        
+        if (state.isLoggedIn && state.userId) {
+          try {
+            const response = await fetch('/api/favorites', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ productId: product.id }),
+            });
 
-          return {
+            if (response.ok) {
+              await get().syncWithDatabase();
+            }
+          } catch (error) {
+            console.error('Failed to add to favorites:', error);
+            set((state) => ({
+              favorites: [...state.favorites, product],
+            }));
+          }
+        } else {
+          set((state) => ({
             favorites: [...state.favorites, product],
-          };
-        });
+          }));
+        }
       },
 
-      removeFromFavorites: (productId) => {
-        set((state) => ({
-          favorites: state.favorites.filter((fav) => fav.id !== productId),
-        }));
+      removeFromFavorites: async (productId) => {
+        const state = get();
+        if (state.isLoggedIn && state.userId) {
+          try {
+            const response = await fetch(`/api/favorites?productId=${productId}`, {
+              method: 'DELETE',
+            });
+            if (response.ok) {
+              await get().syncWithDatabase();
+            }
+          } catch (error) {
+            console.error('Failed to remove from favorites:', error);
+          }
+        } else {
+          set((state) => ({
+            favorites: state.favorites.filter((p) => p.id !== productId),
+          }));
+        }
       },
 
       isFavorite: (productId) => {
-        return get().favorites.some((fav) => fav.id === productId);
+        return get().favorites.some((p) => p.id === productId);
+      },
+
+      syncWithDatabase: async () => {
+        const state = get();
+        if (state.isLoggedIn && state.userId) {
+          try {
+            const response = await fetch('/api/sync');
+            if (response.ok) {
+              const { cart, favorites } = await response.json();
+              set({ cartItems: cart, favorites: favorites });
+            }
+          } catch (error) {
+            console.error('Failed to sync with database:', error);
+          }
+        }
+      },
+
+      migrateLocalData: async () => {
+        const state = get();
+        if (state.cartItems.length > 0 || state.favorites.length > 0) {
+          try {
+            await fetch('/api/migrate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                cart: state.cartItems,
+                favorites: state.favorites,
+              }),
+            });
+            // After migration, sync with DB to get the canonical server state
+            await get().syncWithDatabase();
+          } catch (error) {
+            console.error('Failed to migrate local data:', error);
+          }
+        }
       },
 
       cartCount: () => {
@@ -127,15 +301,36 @@ export const useStore = create<StoreState>()(
       },
 
       cartTotal: () => {
-        return get().cartItems.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
+        return get().cartItems.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0);
+      },
+
+      createOrder: async (addressId, notes) => {
+        const state = get();
+        if (!state.isLoggedIn) {
+          return { success: false, error: 'User not logged in' };
+        }
+        try {
+          const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ addressId, notes }),
+          });
+          if (response.ok) {
+            const data = await response.json();
+            get().clearCart();
+            return { success: true, whatsappLink: data.whatsappLink };
+          } else {
+            const errorData = await response.json();
+            return { success: false, error: errorData.error || 'Failed to create order' };
+          }
+        } catch (error) {
+          console.error('Failed to create order:', error);
+          return { success: false, error: 'An unexpected error occurred' };
+        }
       },
     }),
     {
-      name: 'sheela-store', // unique name for localStorage key
-      partialize: (state) => ({
-        cartItems: state.cartItems,
-        favorites: state.favorites,
-      }),
+      name: 'sheela-store-storage', // name of the item in the storage (must be unique)
     }
   )
 );
