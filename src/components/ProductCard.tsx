@@ -40,7 +40,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <Card className="lg:w-[455px] sm:w-[360px] md:w-[445px]   mx-4 mb-6 shadow-none rounded-none border-0 gap-1">
+    <Card className="sm:w-[360px] md:w-[410px]   mx-4 mb-6 shadow-none rounded-none border-0 gap-1">
       <CardHeader className="relative p-0 mb-0">
         <Swiper
           modules={[Navigation, Pagination]}

@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 
 export default function AdBanner() {
   return (
-      <div className="relative w-full min-h-[400px] bg-[#F3F3F3] flex flex-col justify-center items-center px-5 py-15 overflow-hidden my-5 mb-4">
+      <div className="relative w-full min-h-[400px] bg-[#F3F3F3] flex flex-col justify-center items-center px-5 py-15 overflow-hidden my-5">
       
       {/* Decorative rectangles */}
       <div className="absolute bottom-0 left-[182px] w-[195px] h-[164px] bg-[linear-gradient(270deg,_#FFF_0%,_rgba(255,_255,_255,_0.00)_64.87%)] border-2 border-[#f3f3f3]"></div>

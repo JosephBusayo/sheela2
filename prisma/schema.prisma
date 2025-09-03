@@ -30,22 +30,27 @@ model User {
 
 // Product Management
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  price       String
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  price         String
   originalPrice Float?
-  category    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Product Details
-  images      ProductImage[]
-  sizes       ProductSize[]
-  colors      ProductColor[]
-  cartItems   CartItem[]
-  favorites   Favorite[]
-  orderItems  OrderItem[]
+  images        ProductImage[]
+  sizes         ProductSize[]
+  colors        ProductColor[]
+  cartItems     CartItem[]
+  favorites     Favorite[]
+  orderItems    OrderItem[]
+
+  // Category and SubCategory
+  categoryId    String
+  category      Category     @relation(fields: [categoryId], references: [id])
+  subCategoryId String?
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id])
 
   @@map("products")
 }
@@ -171,15 +176,27 @@ model Address {
   @@map("addresses")
 }
 
-// Enums
-enum Category {
-  WOMEN
-  MEN
-  KIDS
-  UNISEX
-  FABRICS
+// Category Management
+model Category {
+  id            String        @id @default(cuid())
+  name          String        @unique
+  products      Product[]
+  subCategories SubCategory[]
+
+  @@map("categories")
 }
 
+model SubCategory {
+  id         String    @id @default(cuid())
+  name       String
+  products   Product[]
+  categoryId String
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("sub_categories")
+}
+
+// Enums
 enum OrderStatus {
   PENDING
   CONFIRMED
