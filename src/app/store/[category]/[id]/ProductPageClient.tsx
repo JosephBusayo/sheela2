@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import FsLightbox from "fslightbox-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Navigation, Thumbs } from "swiper/modules";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import Image from "next/image";
+import SizeGuide from "@/components/SizeGuide";
 
 interface ProductWithImages extends Product {
   images: ProductImage[];
@@ -29,6 +31,17 @@ interface ProductPageClientProps {
 const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarProducts }) => {
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
+  const [lightboxController, setLightboxController] = useState({
+    toggler: false,
+    slide: 1,
+  });
+
+  function openLightboxOnSlide(number: number) {
+    setLightboxController({
+      toggler: !lightboxController.toggler,
+      slide: number,
+    });
+  }
 
   return (
     
@@ -76,12 +89,15 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
               modules={[FreeMode, Navigation, Thumbs]}
               className="w-full h-full"
             >
-              {product.images.map((image) => (
-                <SwiperSlide key={image.id}>
+              {product.images.map((image, index) => (
+                <SwiperSlide
+                  key={image.id}
+                  onClick={() => openLightboxOnSlide(index + 1)}
+                >
                   <img
                     src={image.url}
                     alt={image.alt ?? product.name}
-                    className="w-full h-full rounded-none object-cover"
+                    className="w-full h-full rounded-none object-cover cursor-pointer"
                   />
                 </SwiperSlide>
               ))}
@@ -115,9 +131,8 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
         <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
             <label className="block text-sm font-medium">Select Size</label>
-            <Link href="#" className="text-xs underline text-gray-600">
-              See Size Guide
-            </Link>
+            <SizeGuide />
+            
           </div>
           <Select>
             <SelectTrigger className="w-full">
@@ -170,7 +185,11 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
           <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8">Place Order</Button>
         </div>
       </div>
-
+      <FsLightbox
+        toggler={lightboxController.toggler}
+        sources={product.images.map((image) => image.url)}
+        slide={lightboxController.slide}
+      />
     </div>
    
   );

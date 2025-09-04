@@ -20,6 +20,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
+    "fslightbox-react": "^2.0.0",
     "lucide-react": "^0.542.0",
     "next": "15.5.1",
     "prisma": "^6.15.0",
@@ -33,6 +34,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/fslightbox-react": "^1.8.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

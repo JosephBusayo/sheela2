@@ -105,31 +105,35 @@ const Header: React.FC = () => {
             </button>
 
             {/* Shopping Cart with Badge */}
-            <button className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
-              <Image
-                src={"/bag-2.svg"}
-                alt="cart"
-                className="w-6 h-6 cursor-pointer"
-                width={6}
-                height={6}
-              />
+            <Link href="/cart">
+              <button className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
+                <Image
+                  src={"/bag-2.svg"}
+                  alt="cart"
+                  className="w-6 h-6 cursor-pointer"
+                  width={6}
+                  height={6}
+                />
 
-              {cartCount() > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gray-800 text-white text-xs rounded-lg w-6 h-5 flex items-center justify-center cursor-pointer">
-                  {cartCount() > 99 ? "99+" : cartCount()}
-                </span>
-              )}
-            </button>
+                {cartCount() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-gray-800 text-white text-xs rounded-lg w-6 h-5 flex items-center justify-center cursor-pointer">
+                    {cartCount() > 99 ? "99+" : cartCount()}
+                  </span>
+                )}
+              </button>
+            </Link>
 
             {/* Wishlist/Favorites with Badge */}
-            <button className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
-              <Heart className="w-6 h-5 cursor-pointer" />
-              {favoritesCount() > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#FF0000] text-white text-xs rounded-lg w-6 h-5 flex items-center justify-center cursor-pointer">
-                  {favoritesCount() > 99 ? "99+" : favoritesCount()}
-                </span>
-              )}
-            </button>
+            <Link href="/wishlist">
+              <button className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
+                <Heart className="w-6 h-5 cursor-pointer" />
+                {favoritesCount() > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[#FF0000] text-white text-xs rounded-lg w-6 h-5 flex items-center justify-center cursor-pointer">
+                    {favoritesCount() > 99 ? "99+" : favoritesCount()}
+                  </span>
+                )}
+              </button>
+            </Link>
 
             {/* User Account */}
             <DropdownMenu>
