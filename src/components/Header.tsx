@@ -4,7 +4,13 @@ import React, { useState } from "react";
 import { Search, ShoppingCart, Heart, User, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useStore } from "../../stores/useStore";
-import { useAuth, useUser, SignInButton, SignUpButton, SignOutButton } from "@clerk/nextjs";
+import {
+  useAuth,
+  useUser,
+  SignInButton,
+  SignUpButton,
+  SignOutButton,
+} from "@clerk/nextjs";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -13,7 +19,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 interface NavItem {
   label: string;
@@ -24,14 +30,14 @@ const Header: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selected, setSelected] = useState(false);
 
- // Get cart and favorites count from Zustand store
-  const { 
-    cartCount, 
-    favoritesCount, 
-    setAuthState, 
+  // Get cart and favorites count from Zustand store
+  const {
+    cartCount,
+    favoritesCount,
+    setAuthState,
     migrateLocalData,
     cartItems,
-    favorites 
+    favorites,
   } = useStore();
 
   const navItems: NavItem[] = [
@@ -46,71 +52,53 @@ const Header: React.FC = () => {
   };
 
   //clerk auth
-   const { isSignedIn, userId } = useAuth();
-    const { user } = useUser();
+  const { isSignedIn, userId } = useAuth();
+  const { user } = useUser();
 
   return (
     <header className="w-full bg-white shadow-sm justify-between py-4">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 justify-between">
         <div className="flex items-center justify-between h-16">
           {/* Left Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center md:space-x-6 lg:space-x-8">
             {navItems.map((item) => (
               <div key={item.label} className="relative">
-                <button
-                  className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 cursor-pointer"
-                  onClick={() => item.hasDropdown && toggleDropdown(item.label)}
-                >
-                  <span className="cursor-pointer">{item.label}</span>
-                  {item.hasDropdown && (
+                <Link href={`/store/${item.label.toLowerCase()}`}>
+                  <button
+                    className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 cursor-pointer"
+                    onClick={() =>
+                      item.hasDropdown && toggleDropdown(item.label)
+                    }
+                  >
+                    <span className="cursor-pointer">{item.label}</span>
+
                     <ChevronDown
                       className={`w-4 h-4 transition-transform duration-200 ${
                         activeDropdown === item.label ? "rotate-180" : ""
                       } cursor-pointer`}
                     />
-                  )}
-                </button>
-
-                {/* Dropdown Menu */}
-                {item.hasDropdown && activeDropdown === item.label && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                    <div className="py-2">
-                      <a
-                        href="#"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                      >
-                        Category 1
-                      </a>
-                      <a
-                        href="#"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                      >
-                        Category 2
-                      </a>
-                      <a
-                        href="#"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                      >
-                        Category 3
-                      </a>
-                    </div>
-                  </div>
-                )}
+                  </button>
+                </Link>
               </div>
             ))}
           </nav>
 
           {/* Logo */}
           <div className="flex-1 md:flex-none md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
+          <Link href={"/"}>
             <img
               src="/images/sheela-logo.png"
               alt=""
-              className="w-36 h-36 items-center flex justify-center"
+              className="w-36 h-36 items-center flex justify-center cursor-pointer"
             />
+            </Link>
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center space-x-4" suppressHydrationWarning={true}>
+          <div
+            className="flex items-center space-x-4"
+            suppressHydrationWarning={true}
+          >
             {/* Search */}
             <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
               <Search className="w-5 h-5 cursor-pointer" />
@@ -128,7 +116,7 @@ const Header: React.FC = () => {
 
               {cartCount() > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gray-800 text-white text-xs rounded-lg w-6 h-5 flex items-center justify-center cursor-pointer">
-                   {cartCount() > 99 ? "99+" : cartCount()}
+                  {cartCount() > 99 ? "99+" : cartCount()}
                 </span>
               )}
             </button>
@@ -199,13 +187,22 @@ const Header: React.FC = () => {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-            
           </div>
 
           {/* Mobile Menu Button */}
           <button className="md:hidden p-2 text-gray-600 hover:text-gray-900 cursor-pointer">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
         </div>
@@ -233,10 +230,10 @@ const Header: React.FC = () => {
           onClick={() => setActiveDropdown(null)}
         />
       )}
-       {/* Welcome Message for New Users */}
+      {/* Welcome Message for New Users */}
       {isSignedIn && user && (
         <div className="bg-[#4A5D4A] text-white py-2 px-4 text-center text-sm">
-          Welcome back, {user.firstName || user.emailAddresses[0].emailAddress}! 
+          Welcome back, {user.firstName || user.emailAddresses[0].emailAddress}!
           {cartItems.length > 0 || favorites.length > 0 ? (
             <span className="ml-2">Your cart and favorites are synced.</span>
           ) : null}
