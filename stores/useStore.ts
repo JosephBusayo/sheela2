@@ -6,7 +6,7 @@ export interface Product {
   id: string;
   name: string;
   price: string;
-  originalPrice?: number;
+  originalPrice?: number | null;
   images: string[];
   category: {
     name: 'women' | 'men' | 'kids' | 'unisex' | 'fabrics';
@@ -14,7 +14,7 @@ export interface Product {
   subCategory?: string;
   sizes?: string[];
   colors?: string[];
-  description?: string;
+  description?: string | null;
 }
 
 export interface CartItem extends Product {
