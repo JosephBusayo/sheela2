@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { useUser } from '@clerk/nextjs'
-import prisma from '@/lib/prisma'
-const {user} = useUser()
+import prisma from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
+
 export async function GET() {
   try {
+    const {userId} = await auth()
    
-    if (!user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const favorites = await prisma.favorite.findMany({
-      where: { userId: user.id },
+      where: { userId: userId },
       include: {
         product: {
           include: { images: true }
@@ -32,8 +33,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    
-    if (!user) {
+    const {userId} = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     const favorite = await prisma.favorite.create({
       data: {
-        userId: user.id,
+        userId: userId,
         productId,
       },
       include: {
@@ -64,8 +65,8 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
    
-    
-    if (!user) {
+    const {userId} = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -79,7 +80,7 @@ export async function DELETE(request: NextRequest) {
     await prisma.favorite.delete({
       where: {
         userId_productId: {
-          userId: user.id,
+          userId: userId,
           productId,
         },
       },

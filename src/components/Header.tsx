@@ -88,12 +88,16 @@ const Header: React.FC = () => {
 
           {/* Logo */}
           <div className="flex-1 md:flex-none md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
-          <Link href={"/"}>
-            <img
-              src="/images/sheela-logo.png"
-              alt=""
-              className="w-36 h-36 items-center flex justify-center cursor-pointer"
-            />
+            <Link href={"/"}>
+              <div className="relative w-36 h-36">
+                <Image
+                  src="/images/sheela-logo.png"
+                  alt="Sheela Logo"
+                  layout="fill"
+                  objectFit="contain"
+                  className="cursor-pointer"
+                />
+              </div>
             </Link>
           </div>
 
