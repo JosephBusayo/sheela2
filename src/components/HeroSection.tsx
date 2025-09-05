@@ -8,15 +8,16 @@ import { Button } from "@/components/ui/button";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import Link from "next/link";
 
 export default function Hero() {
   const backgroundImages = [
     {
       left: "/images/model1.png",
-      right: "/images/model5.jpg",
+      right: "/images/model2.png",
     },
     {
-      left: "/images/model5.jpg",
+      left: "/images/model2.png",
       right: "/images/model1.png",
     },
   ];
@@ -71,15 +72,17 @@ export default function Hero() {
         "
       >
         <h1
-          className="relative text-white text-center text-[36px] font-normal leading-[140%] self-stretch"
+          className="relative text-white text-center text-2xl md:text-3xl lg:text-4xl font-normal leading-[140%] self-stretch"
         >
           STANDOUT FROM THE CROWD WITH WEARS AND STYLES FROM SHEELA
         </h1>
-        <Button className="h-[50px] w-[220px] bg-bt-green hover:bg-bt-green/90 px-6 py-2.5 translate-y-[-1rem] mt-6 cursor-pointer border-0 rounded-none shadow-sm">
-         <span className="font-medium text-white text-base tracking-[0] leading-[22.4px]">
+        <Link href={"/store/women"}>
+        <Button className="h-8 w-36 md:h-12 md:w-42 bg-bt-green px-6 py-2 mt-6 cursor-pointer border-0 rounded-none shadow-sm">
+         <span className="font-normal text-white text-sm md:text-lg">
           Place Your Order
           </span> 
         </Button>
+        </Link>
       </div>
     </section>
   );

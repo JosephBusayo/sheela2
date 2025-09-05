@@ -41,7 +41,8 @@ export const sampleProducts: Product[] = [
       '/images/model1.png',
       '/images/senator-2.png'
     ],
-    category: 'men',
+    category: { name: 'men' },
+    subCategory: 'Senator',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: ['Cream', 'White', 'Navy'],
     description: 'Classic Nigerian senator wear made from premium cotton fabric'
@@ -56,7 +57,8 @@ export const sampleProducts: Product[] = [
       '/images/adire-1.png',
       '/images/adire-2.png'
     ],
-    category: 'women',
+    category: { name: 'women' },
+    subCategory: 'Dresses',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     colors: ['Blue', 'Indigo', 'Navy'],
     description: 'Beautiful traditional Adire dress with modern cut'
@@ -70,10 +72,52 @@ export const sampleProducts: Product[] = [
       '/images/ankara-2.png',
       '/images/ankara-3.png'
     ],
-    category: 'women',
+    category: { name: 'women' },
+    subCategory: 'Dresses',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     colors: ['Red', 'Gold', 'Green'],
     description: 'Vibrant Ankara print dress perfect for special occasions'
   },
-
+  {
+    id: 'st001',
+    name: 'STO01 - SILK BLOUSE',
+    price: "25000",
+    images: [
+      '/images/model2.png',
+      '/images/model3.png',
+    ],
+    category: { name: 'women' },
+    subCategory: 'Tops & Blouses',
+    sizes: ['S', 'M', 'L'],
+    colors: ['Ivory', 'Black', 'Champagne'],
+    description: 'Elegant silk blouse for a sophisticated look.'
+  },
+  {
+    id: 'sk001',
+    name: 'SKO01 - EMBROIDERED KAFTAN',
+    price: "45000",
+    images: [
+      '/images/model4.png',
+      '/images/model5.jpg',
+    ],
+    category: { name: 'women' },
+    subCategory: 'Kaftans & Abayas',
+    sizes: ['One Size'],
+    colors: ['Gold', 'Silver', 'Emerald'],
+    description: 'Luxurious kaftan with intricate embroidery.'
+  },
+  {
+    id: 'sj001',
+    name: 'SJO01 - ANKARA JACKET',
+    price: "38000",
+    images: [
+      '/images/model6.png',
+      '/images/model8.png',
+    ],
+    category: { name: 'women' },
+    subCategory: 'Jackets & Outerwear',
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: ['Multi-color'],
+    description: 'Stylish and versatile Ankara jacket.'
+  },
 ];

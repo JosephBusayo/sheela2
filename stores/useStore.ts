@@ -8,7 +8,10 @@ export interface Product {
   price: string;
   originalPrice?: number;
   images: string[];
-  category: 'women' | 'men' | 'kids' | 'unisex';
+  category: {
+    name: 'women' | 'men' | 'kids' | 'unisex' | 'fabrics';
+  };
+  subCategory?: string;
   sizes?: string[];
   colors?: string[];
   description?: string;
@@ -222,14 +225,14 @@ export const useStore = create<StoreState>()(
             }
           } catch (error) {
             console.error('Failed to add to favorites:', error);
+          }
+        } else {
+          // Avoid duplicates in local state
+          if (!get().favorites.some((p) => p.id === product.id)) {
             set((state) => ({
               favorites: [...state.favorites, product],
             }));
           }
-        } else {
-          set((state) => ({
-            favorites: [...state.favorites, product],
-          }));
         }
       },
 
@@ -261,10 +264,14 @@ export const useStore = create<StoreState>()(
         const state = get();
         if (state.isLoggedIn && state.userId) {
           try {
-            const response = await fetch('/api/sync');
-            if (response.ok) {
-              const { cart, favorites } = await response.json();
-              set({ cartItems: cart, favorites: favorites });
+            const [cartRes, favoritesRes] = await Promise.all([
+              fetch('/api/cart'),
+              fetch('/api/favorites'),
+            ]);
+            if (cartRes.ok && favoritesRes.ok) {
+              const cartData = await cartRes.json();
+              const favoritesData = await favoritesRes.json();
+              set({ cartItems: cartData.cartItems || [], favorites: favoritesData.favorites || [] });
             }
           } catch (error) {
             console.error('Failed to sync with database:', error);
@@ -273,59 +280,65 @@ export const useStore = create<StoreState>()(
       },
 
       migrateLocalData: async () => {
-        const state = get();
-        if (state.cartItems.length > 0 || state.favorites.length > 0) {
+        const { cartItems, favorites, syncWithDatabase } = get();
+        if (cartItems.length > 0 || favorites.length > 0) {
           try {
-            await fetch('/api/migrate', {
+            const response = await fetch('/api/cart/migrate', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                cart: state.cartItems,
-                favorites: state.favorites,
-              }),
+              body: JSON.stringify({ cartItems, favorites }),
             });
-            // After migration, sync with DB to get the canonical server state
-            await get().syncWithDatabase();
+            if (response.ok) {
+              set({ cartItems: [], favorites: [] }); // Clear local state
+              await syncWithDatabase(); // Sync with merged server state
+            }
           } catch (error) {
             console.error('Failed to migrate local data:', error);
           }
         }
       },
 
-      cartCount: () => {
-        return get().cartItems.reduce((total, item) => total + item.quantity, 0);
-      },
-
-      favoritesCount: () => {
-        return get().favorites.length;
-      },
+      cartCount: () => get().cartItems.reduce((acc, item) => acc + item.quantity, 0),
+      
+      favoritesCount: () => get().favorites.length,
 
       cartTotal: () => {
-        return get().cartItems.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0);
+        return get().cartItems.reduce((acc, item) => {
+          // Ensure price is a number, removing currency symbols etc.
+          const price = parseFloat(String(item.price).replace(/[^0-9.-]+/g,""));
+          return acc + price * item.quantity;
+        }, 0);
       },
 
       createOrder: async (addressId, notes) => {
-        const state = get();
-        if (!state.isLoggedIn) {
-          return { success: false, error: 'User not logged in' };
+        const { cartItems, cartTotal, clearCart } = get();
+        if (cartItems.length === 0) {
+          return { success: false, error: 'Your cart is empty.' };
         }
+
         try {
           const response = await fetch('/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ addressId, notes }),
+            body: JSON.stringify({
+              cartItems,
+              total: cartTotal(),
+              addressId,
+              notes,
+            }),
           });
+
+          const result = await response.json();
+
           if (response.ok) {
-            const data = await response.json();
-            get().clearCart();
-            return { success: true, whatsappLink: data.whatsappLink };
+            await clearCart();
+            return { success: true, whatsappLink: result.whatsappLink };
           } else {
-            const errorData = await response.json();
-            return { success: false, error: errorData.error || 'Failed to create order' };
+            return { success: false, error: result.error || 'Failed to create order.' };
           }
         } catch (error) {
           console.error('Failed to create order:', error);
-          return { success: false, error: 'An unexpected error occurred' };
+          return { success: false, error: 'An unexpected error occurred.' };
         }
       },
     }),

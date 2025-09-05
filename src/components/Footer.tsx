@@ -22,16 +22,16 @@ const Footer: React.FC = () => {
   };
 
   const categories = [
-    { name: 'Women', href: '/women' },
-    { name: 'Men', href: '/men' },
-    { name: 'Kids', href: '/kids' },
-    { name: 'Unisex', href: '/unisex' },
-    { name: 'Fabrics', href: '/fabrics' }
+    { name: 'Women', href: '/store/women' },
+    { name: 'Men', href: '/store/men' },
+    { name: 'Kids', href: '/store/kids' },
+    { name: 'Unisex', href: '/store/unisex' },
+    { name: 'Fabrics', href: '/store/fabrics' }
   ];
 
   const quickLinks = [
     { name: 'About Us', href: '/about' },
-    { name: 'Help', href: '/help' },
+    { name: 'Help', href: '/contact-us' },
     { name: 'T&Cs', href: '/terms' },
     { name: 'Shipping', href: '/shipping' }
   ];
@@ -143,18 +143,18 @@ const Footer: React.FC = () => {
                     className="bg-transparent text-gray-900 px-4 py-2 flex-1 focus:outline-none"
                     required
                   />
-                  <button
+                  <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-bt-green text-white px-4 py-2 hover:bg-bt-green/90 transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-bt-green text-white px-4 py-2 rounded-none cursor-pointer hover:bg-bt-green/90 transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Subscribe to newsletter"
                   >
                     {isSubmitting ? (
                       <Loader2 className="w-4 h-4 animate-spin"/>
                     ) : (
-                      <Button className="w-4 h-5 cursor-pointer bg-bt-green" >Send</Button>
+                      'Send'
                     )}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
