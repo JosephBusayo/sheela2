@@ -12,13 +12,13 @@ import Footer from '@/components/Footer'
 
 const Home = () => {
   return (
-    <div className='flex flex-col items-center justify-center overflow-clip'>
+    <div className='flex flex-col items-center justify-center overflow-clip' suppressHydrationWarning={true}>
       <Header/>
       <HeroSection/>
       <FeatureCard/>
-      <ProductGrid products={sampleProducts}/>
+      <ProductGrid products={sampleProducts} className='md:pr-8 lg:pr-0'/>
       <DreamSection/>
-      <ProductGrid products={sampleProducts}/>
+      <ProductGrid products={sampleProducts} className='md:pr-8 lg:pr-0'/>
       <AdBanner/>
       <Footer/>
 

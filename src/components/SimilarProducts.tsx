@@ -15,7 +15,7 @@ type SimilarProductsProps = {
 
 const SimilarProducts = ({ products }: SimilarProductsProps) => {
   return (
-    <div className="my-10">
+    <div className="my-10 md:pr-5 lg:pr-0">
       <h1 className="text-3xl font-normal text-center uppercase">
         You Might Also Like
       </h1>

@@ -7,6 +7,9 @@ import ProductGrid from "@/components/ProductGrid";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
@@ -34,7 +37,9 @@ export default function CategoryPageClient({ category }: { category: string }) {
   const [priceRange, setPriceRange] = useState([100, 400]);
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [subCategories, setSubCategories] = useState<{ id: string; name: string }[]>([]);
+  const [subCategories, setSubCategories] = useState<
+    { id: string; name: string }[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -140,7 +145,10 @@ export default function CategoryPageClient({ category }: { category: string }) {
               {/* Category Links */}
               <div className="mt-4 space-y-3 text-sm font-extralight">
                 {subCategories.map((subCategory) => (
-                  <div key={subCategory.id} className="flex flex-row items-center gap-2">
+                  <div
+                    key={subCategory.id}
+                    className="flex flex-row items-center gap-2"
+                  >
                     <Link href="#" className="block hover:underline">
                       {subCategory.name}
                     </Link>
@@ -184,13 +192,23 @@ export default function CategoryPageClient({ category }: { category: string }) {
           </div>
         </div>
         <div className="flex flex-row justify-center items-center gap-2">
-          <h3 className="font-bold mr-3">Sort by</h3>
+          <h3 className="font-bold mr-1">Sort by</h3>
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex flex-row items-center justify-center font-extralight text-gray-600">
-              Default sorting
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="flex flex-row items-center justify-center font-extralight text-gray-600"
+              >
+                Default sorting
+                <ChevronDown className="h-4 w-4" />
+              </Button>
             </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Latest Arrivals</DropdownMenuItem>
+              <DropdownMenuSeparator/>
+              <DropdownMenuItem>Trending</DropdownMenuItem>
+            </DropdownMenuContent>
           </DropdownMenu>
-          <ChevronDown className="text-gray-600" />
         </div>
       </div>
       {isLoading ? (
@@ -198,7 +216,6 @@ export default function CategoryPageClient({ category }: { category: string }) {
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex flex-col space-y-3">
               <Skeleton className="h-[400px] w-full rounded-xl" />
-              
             </div>
           ))}
         </div>

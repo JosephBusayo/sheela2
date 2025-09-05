@@ -9,6 +9,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Heart, ShoppingBag } from "lucide-react";
+import { toast } from "sonner";
 import { Product, useStore } from "../../stores/useStore";
 import {
   Card,
@@ -31,12 +32,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   const handleAddToCart = () => {
     addToCart(product);
+    toast.success(`${product.name} has been added to your cart.`);
   };
   const handleToggleFavorite = () => {
     if (isInFavorites) {
       removeFromFavorites(product.id);
+      toast.success(`${product.name} has been removed from your favorites.`);
     } else {
       addToFavorites(product);
+      toast.success(`${product.name} has been added to your favorites.`);
     }
   };
 

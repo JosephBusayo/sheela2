@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button } from './ui/button'
+import Link from 'next/link'
 
 const DreamSection = () => {
   return (
@@ -23,11 +24,13 @@ const DreamSection = () => {
               For You.
             </p>
           </div>
-          <Button className="h-[50px] bg-bt-green hover:bg-bt-green/90 px-6 py-2.5 border-0 rounded-none text-white cursor-pointer">
+          <Link href={"/contact-us"}>
+          <Button className="h-[50px] bg-bt-green px-6 py-2.5 border-0 rounded-none text-white cursor-pointer">
             <span className="text-base font-medium leading-[22.4px] tracking-[0]">
               DESIGN WITH SHEELA
             </span>
           </Button>
+          </Link>
         </div>
       </div>
 
