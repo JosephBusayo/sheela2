@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import FsLightbox from "fslightbox-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Navigation, Thumbs } from "swiper/modules";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus } from "lucide-react";
 import { Product, ProductImage } from "@prisma/client";
-
+import { toast } from "sonner";
 
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -15,9 +16,9 @@ import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import Header from "@/components/Header";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Link from "next/link";
 import Image from "next/image";
 import SizeGuide from "@/components/SizeGuide";
+import { useStore } from "../../../../../stores/useStore";
 
 interface ProductWithImages extends Product {
   images: ProductImage[];
@@ -29,6 +30,8 @@ interface ProductPageClientProps {
 }
 
 const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarProducts }) => {
+  const pathname = usePathname();
+  const category = pathname.split("/")[2];
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [lightboxController, setLightboxController] = useState({
@@ -42,6 +45,17 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
       slide: number,
     });
   }
+const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore();
+
+   const handleAddToCart = () => {
+    const productToAdd = {
+      ...product,
+      images: product.images.map((image) => image.url),
+      category: { name: category as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics' },
+    };
+    addToCart(productToAdd);
+    toast.success(`${product.name} has been added to your cart.`);
+  };
 
   return (
     
@@ -181,7 +195,10 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
 
         {/* Action Buttons */}
         <div className="flex gap-3">
-          <Button variant="outline" className="rounded-none cursor-pointer"> <Image src={"/bag-2.svg"} alt="package" width={14} height={14}/>Add to Cart</Button>
+          <Button variant="outline" className="rounded-none cursor-pointer" onClick={handleAddToCart}>
+            <Image src={"/bag-2.svg"} alt="package" width={14} height={14} />
+            Add to Cart
+          </Button>
           <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8">Place Order</Button>
         </div>
       </div>

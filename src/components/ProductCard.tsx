@@ -46,17 +46,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
    
-      <Card className="sm:w-[360px] md:w-[410px]   mx-4 mb-6 shadow-none rounded-none border-0 gap-1">
+      <Card className="sm:w-[360px] md:w-[400px]  mx-4 mb-6 shadow-none rounded-none border-0 gap-1">
         <CardHeader className="relative p-0 mb-0">
             <Swiper
-            modules={[Navigation, Pagination]}
+            modules={[Navigation, Pagination, Autoplay]}
             navigation
             pagination={{ clickable: false }}
-            autoplay={{ delay: 3000, disableOnInteraction: true }}
+            autoplay={{ delay: 4500, disableOnInteraction: true }}
             loop={true}
             className="w-full h-[557px] cursor-pointer"
             onClick={() => {
-              window.location.href = `/store/category/${product.id}`;
+              window.location.href = `/store/product/${product.id}`;
             }}
             >
             {product.images.map((image, index) => (
