@@ -1,5 +1,6 @@
 import { sampleProducts } from "../src/lib/utils";
 import { PrismaClient } from "@prisma/client";
+import { Product } from "../stores/useStore";
 
 const prisma = new PrismaClient();
 
@@ -16,7 +17,7 @@ async function main() {
 
   // Seed Categories and Subcategories
   console.log("Seeding categories and subcategories...");
-  const categories = [...new Set(sampleProducts.map(p => p.category.name))];
+  const categories = [...new Set(sampleProducts.map((p: Product) => p.category.name))];
   for (const categoryName of categories) {
     await prisma.category.create({
       data: {
@@ -25,7 +26,7 @@ async function main() {
     });
   }
 
-  const subCategories = [...new Set(sampleProducts.filter(p => p.subCategory).map(p => ({ category: p.category.name, subCategory: p.subCategory })))];
+  const subCategories = [...new Set(sampleProducts.filter((p: Product) => p.subCategory).map((p: Product) => ({ category: p.category.name, subCategory: p.subCategory })))];
   for (const item of subCategories) {
     const category = await prisma.category.findUnique({ where: { name: item.category } });
     if (category) {

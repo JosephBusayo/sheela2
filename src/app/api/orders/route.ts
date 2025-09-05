@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { useUser } from '@clerk/nextjs'
+
 import { OrderService } from '@/lib/order-services'
+import { auth } from '@clerk/nextjs/server';
 
 export async function POST(request: NextRequest) {
-    const {user} = useUser()
+   
   try {
-    
-    if (!user) {
+    const {userId} = await auth()
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { addressId, notes } = await request.json()
 
     const order = await OrderService.createOrderFromCart(
-      user.id,
+      userId,
       addressId,
       notes
     )

@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Header from '@/components/Header'
 import React from 'react'
 import Footer from '@/components/Footer'
+import Image from 'next/image'
 
 const AboutUs = () => {
   const features = [
@@ -56,11 +57,13 @@ const AboutUs = () => {
       <section className="my-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <div>
-              <img
+            <div className="relative w-full h-auto md:w-[488px] md:h-[484px] lg:w-[688px] lg:h-[684px]">
+              <Image
                 src="/images/model1.png"
                 alt="About Sheela"
-                className="w-full h-auto md:w-[488px] md:h-[484px] lg:w-[688px] lg:h-[684px] object-cover rounded-none shadow-lg"
+                layout="fill"
+                objectFit="cover"
+                className="rounded-none shadow-lg"
               />
             </div>
             <div className="text-gray-700 text-lg lg:text-3xl">
@@ -94,11 +97,14 @@ const AboutUs = () => {
               {features.map((feature, index) => (
                 <Card key={index} className="text-center border-none shadow-none">
                   <CardContent className=''>
-                    <img
-                      src={feature.icon}
-                      alt={feature.alt}
-                      className="w-full h-72 object-cover mb-4 bg-gray-200"
-                    />
+                    <div className="relative w-full h-72 mb-4 bg-gray-200">
+                      <Image
+                        src={feature.icon}
+                        alt={feature.alt}
+                        layout="fill"
+                        objectFit="cover"
+                      />
+                    </div>
                     <h3 className="text-xl font-normal tracking-widest mb-2 text-start">
                       {feature.title}
                     </h3>

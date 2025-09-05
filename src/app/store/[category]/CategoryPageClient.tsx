@@ -33,6 +33,18 @@ import { Slider } from "@/components/ui/slider";
 import { Product } from "../../../../stores/useStore";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface ProductFromDb {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice: number | null;
+  description: string | null;
+  category: {
+    name: string;
+  };
+  images: { url: string }[];
+}
+
 export default function CategoryPageClient({ category }: { category: string }) {
   const [priceRange, setPriceRange] = useState([100, 400]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -53,7 +65,7 @@ export default function CategoryPageClient({ category }: { category: string }) {
         const data = await response.json();
         const { products: productsFromDb, totalProducts } = data;
 
-        const products = productsFromDb.map((product: any) => ({
+        const products = productsFromDb.map((product: ProductFromDb) => ({
           ...product,
           category: {
             name: product.category.name.toLowerCase() as
@@ -67,7 +79,7 @@ export default function CategoryPageClient({ category }: { category: string }) {
             product.originalPrice === null ? undefined : product.originalPrice,
           description:
             product.description === null ? undefined : product.description,
-          images: product.images.map((image: any) => image.url),
+          images: product.images.map((image: { url: string }) => image.url),
         }));
         setProducts(products);
         setTotalProducts(totalProducts);

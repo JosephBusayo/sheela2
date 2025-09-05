@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Loader2, Send } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from './ui/button';
+import Link from 'next/link';
 
 const Footer: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -68,12 +69,12 @@ const Footer: React.FC = () => {
             <ul className="space-y-3">
               {categories.map((category) => (
                 <li key={category.name}>
-                  <a
+                  <Link
                     href={category.href}
                     className="text-gray-300 hover:text-white transition-colors duration-200"
                   >
                     {category.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -87,12 +88,12 @@ const Footer: React.FC = () => {
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <a
+                  <Link
                     href={link.href}
                     className="text-gray-300 hover:text-white transition-colors duration-200"
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -106,13 +107,13 @@ const Footer: React.FC = () => {
             <ul className="space-y-3">
               {socialLinks.map((social) => (
                 <li key={social.name}>
-                  <a
+                  <Link
                     href={social.href}
                     className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors duration-200"
                   >
                     {/* <SocialIcon icon={social.icon} /> */}
                     <span>{social.name}</span>
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
