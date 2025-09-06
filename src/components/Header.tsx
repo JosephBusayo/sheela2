@@ -59,8 +59,8 @@ const Header: React.FC = () => {
   const { user } = useUser();
 
   return (
-    <header className="w-full bg-white shadow-sm justify-between py-4">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 justify-between">
+    <header className="w-full bg-white shadow-sm justify-between sm:py-2 md:py-4">
+      <div className="mx-auto px-1 md:px-6 lg:px-8 justify-between">
         <div className="flex items-center justify-between h-16">
           {/* Left Navigation */}
           <nav className="hidden md:flex items-center md:space-x-6 lg:space-x-8">
@@ -89,21 +89,20 @@ const Header: React.FC = () => {
           {/* Logo */}
           <div className="flex-1 md:flex-none md:absolute md:left-1/2 md:transform md:-translate-x-1/2">
             <Link href={"/"}>
-              <div className="relative w-36 h-36">
-                <Image
-                  src="/images/sheela-logo.png"
-                  alt="Sheela Logo"
-                  layout="fill"
-                  objectFit="contain"
-                  className="cursor-pointer"
-                />
+              <div className="relative w-24 h-24 sm:w-16 sm:h-16 md:w-36 md:h-36">
+              <Image
+                src="/images/sheela-logo.png"
+                alt="Sheela Logo"
+                fill
+                className="cursor-pointer object-contain"
+              />
               </div>
             </Link>
           </div>
 
           {/* Right Actions */}
           <div
-            className="flex items-center space-x-4"
+            className="flex items-center space-x-0 md:space-x-4"
             suppressHydrationWarning={true}
           >
             {/* Search */}
@@ -111,8 +110,8 @@ const Header: React.FC = () => {
               <div className="relative flex items-center">
                 <input
                   type="text"
-                  placeholder="Search..."
-                  className="border rounded-md py-1 px-2 w-32 transition-all duration-300 ease-in-out"
+                  placeholder="Search"
+                  className="border rounded-md py-1 sm:px-2 md:px-2 w-24 md:w-32 transition-all duration-300 ease-in-out"
                   autoFocus
                 />
                 <button
@@ -134,12 +133,11 @@ const Header: React.FC = () => {
             {/* Shopping Cart with Badge */}
             <Link href="/cart">
               <button className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
-                <Image
-                  src={"/bag-2.svg"}
-                  alt="cart"
-                  className="w-6 h-6 cursor-pointer"
-                  width={6}
-                  height={6}
+                <ShoppingCart
+                 
+                
+                  className="w-6 h-5 cursor-pointer"
+                 
                 />
 
                 {cartCount() > 0 && (

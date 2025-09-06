@@ -46,29 +46,29 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
    
-      <Card className="sm:w-[360px] md:w-[400px]  mx-4 mb-6 shadow-none rounded-none border-0 gap-1">
+      <Card className="sm:w-full md:w-[400px]  mx-4 mb-6 shadow-none rounded-none border-0 gap-1">
         <CardHeader className="relative p-0 mb-0">
             <Swiper
-            modules={[Navigation, Pagination, Autoplay]}
-            navigation
-            pagination={{ clickable: false }}
-            autoplay={{ delay: 4500, disableOnInteraction: true }}
-            loop={true}
-            className="w-full h-[557px] cursor-pointer"
-            onClick={() => {
+              modules={[Navigation, Pagination, Autoplay]}
+              navigation
+              pagination={{ clickable: false }}
+              autoplay={{ delay: 4500, disableOnInteraction: true }}
+              loop={true}
+              className="w-full sm:w-[400px] md:w-full h-[300px] sm:h-[200px] md:h-[500px] lg:h-[500px] xl:h-[600px] cursor-pointer"
+              onClick={() => {
               window.location.href = `/store/product/${product.id}`;
-            }}
+              }}
             >
-            {product.images.map((image, index) => (
+              {product.images.map((image, index) => (
               <SwiperSlide key={index}>
-              <Image
+                <Image
                 src={image}
                 alt={product.name}
                 fill
                 className="object-cover"
-              />
+                />
               </SwiperSlide>
-            ))}
+              ))}
             </Swiper>
           <div className="absolute bottom-2 right-2 mb-2 flex flex-row items-center bg-white border-1 border-black/30 z-10">
             <div className="p-2" onClick={handleToggleFavorite}>

@@ -23,7 +23,7 @@ export default function Hero() {
   ];
 
   return (
-    <section className="relative w-full h-[50vh] md:h-[70vh] lg:h-[80vh] overflow-hidden flex items-center justify-center mb-2">
+    <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden flex items-center justify-center mb-2">
       {/* Swiper Carousel */}
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}

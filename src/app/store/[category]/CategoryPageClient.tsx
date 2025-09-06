@@ -3,7 +3,7 @@ import AdBanner from "@/components/AdBanner";
 import BreadCrumb from "@/components/BreadCrumb";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import ProductGrid from "@/components/ProductGrid";
+import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -133,24 +133,24 @@ export default function CategoryPageClient({ category }: { category: string }) {
           <BreadCrumb title={category.toUpperCase()} />
         </div>
       </section>
-      <div className="flex flex-row justify-between px-2 py-2 m-2 my-6 mb-0">
-        <div className="flex flex-row items-center justify-center gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-2 py-2 m-2 my-6 mb-0">
+        <div className="flex flex-row items-center justify-between md:justify-center gap-6 w-full md:w-auto">
           <Sheet>
             <SheetTrigger asChild>
               <div className="flex cursor-pointer flex-row items-center justify-center gap-2">
                 <Image
                   src="/filter.svg"
                   alt="filter"
-                  className="h-4 w-4"
+                  className="h-4 w-4 sm:h-2 sm:w-2 md:h-5 md:w-5"
                   width={4}
                   height={4}
                 />
-                <h3 className="font-bold">Filters</h3>
+                <h3 className="font-bold text-sm md:text-base">Filters</h3>
               </div>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 sm:w-80 px-4">
               <SheetHeader className="flex justify-between items-start">
-                <SheetTitle className="text-lg font-semibold ">
+                <SheetTitle className="text-lg font-semibold">
                   {category.toUpperCase()} STYLES
                 </SheetTitle>
               </SheetHeader>
@@ -198,18 +198,18 @@ export default function CategoryPageClient({ category }: { category: string }) {
             </SheetContent>
           </Sheet>
           <div>
-            <p className="font-extralight text-gray-600">
+            <p className="font-extralight text-gray-600 text-xs md:text-sm">
               Showing {products.length} of {totalProducts} styles
             </p>
           </div>
         </div>
-        <div className="flex flex-row justify-center items-center gap-2">
-          <h3 className="font-bold mr-1">Sort by</h3>
+        <div className="flex flex-row justify-between md:justify-center items-center gap-2 w-full md:w-auto">
+          <h3 className="font-bold mr-1 text-sm md:text-base">Sort by</h3>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex flex-row items-center justify-center font-extralight text-gray-600"
+                className="flex flex-row items-center justify-center font-extralight text-gray-600 text-sm md:text-base"
               >
                 Default sorting
                 <ChevronDown className="h-4 w-4" />
@@ -217,7 +217,7 @@ export default function CategoryPageClient({ category }: { category: string }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem>Latest Arrivals</DropdownMenuItem>
-              <DropdownMenuSeparator/>
+              <DropdownMenuSeparator />
               <DropdownMenuItem>Trending</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -232,7 +232,11 @@ export default function CategoryPageClient({ category }: { category: string }) {
           ))}
         </div>
       ) : (
-        <ProductGrid products={products} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 overflow-hidden">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       )}
       <AdBanner />
       <Footer />
