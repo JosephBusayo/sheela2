@@ -16,7 +16,7 @@ export default function AdBanner() {
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-2xl flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 gap-6">
-        <h2 className="relative mt-[-1.00px] self-stretch text-center text-4xl font-normal leading-[50.4px] tracking-[0] text-black uppercase">
+        <h2 className="relative mt-[-1.00px] self-stretch text-center text-2xl md:text-4xl   font-normal leading-[50.4px] tracking-[0] text-black uppercase">
           Place Your Order, Your Way
         </h2>
         
@@ -24,11 +24,9 @@ export default function AdBanner() {
           Explore Our Catalog For Inspiration Or Send Us Your Unique Style Idea—Order Directly Through WhatsApp And We'll Craft It For You.
         </p>
         <Link href={"/store/women"}>
-        <Button className="h-[50px] bg-bt-green px-6 py-2.5 border-0 rounded-none text-white cursor-pointer">
-            <span className="text-base font-medium leading-[22.4px] tracking-[0]">
-              PLACE YOUR ORDER
-            </span>
-          </Button>
+        <Button className="h-[40px] px-4 text-sm sm:h-[50px] sm:px-6 sm:text-base bg-bt-green border-0 rounded-none text-white cursor-pointer font-medium leading-[22.4px] tracking-[0]">
+          PLACE YOUR ORDER
+        </Button>
           </Link>
       </div>
       </div>

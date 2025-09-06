@@ -57,7 +57,7 @@ const AboutUs = () => {
       <section className="my-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <div className="relative w-full h-auto md:w-[488px] md:h-[484px] lg:w-[688px] lg:h-[684px]">
+            <div className="relative w-full h-auto md:w-[400px] md:h-[484px] lg:w-[600px] lg:h-[684px]">
               <Image
                 src="/images/model1.png"
                 alt="About Sheela"

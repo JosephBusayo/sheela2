@@ -62,23 +62,24 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
     
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:max-w-7xl mx-auto mt-6">
       {/* LEFT: Product Gallery */}
-      <div className="flex flex-col-reverse md:flex-row gap-4 items-start">
+      <div className="flex flex-col md:flex-row gap-4 items-start">
         {/* Thumbnails */}
-        <div className="w-full md:w-24 flex-shrink-0">
+        <div className="w-full md:w-24 flex-shrink-0 order-last md:order-first">
           <Swiper
             onSwiper={setThumbsSwiper}
             direction="horizontal"
             breakpoints={{
               768: {
                 direction: "vertical",
+                slidesPerView: 7,
               },
             }}
             spaceBetween={10}
-            slidesPerView={7}
+            slidesPerView={5}
             freeMode={true}
             watchSlidesProgress={true}
             modules={[FreeMode, Navigation, Thumbs]}
-            className="h-24 md:h-[600px]"
+            className="h-24 md:h-[600px] w-full"
           >
             {product.images.map((image) => (
               <SwiperSlide key={image.id}>
@@ -93,8 +94,8 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
         </div>
 
         {/* Main Image */}
-        <div className="flex-1">
-          <div className="md:w-[450px] md:h-[600px] lg:w-[520px] lg:h-[600px]">
+        <div className="flex-1 w-full">
+          <div className="w-full h-[350px] md:w-[470px] md:h-[600px] lg:w-[520px] lg:h-[600px]">
             <Swiper
               style={{ "--swiper-navigation-color": "#000" } as any}
               spaceBetween={5}
@@ -194,12 +195,12 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
         </p>
 
         {/* Action Buttons */}
-        <div className="flex gap-3">
-          <Button variant="outline" className="rounded-none cursor-pointer" onClick={handleAddToCart}>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button variant="outline" className="rounded-none cursor-pointer flex-1" onClick={handleAddToCart}>
             <Image src={"/bag-2.svg"} alt="package" width={14} height={14} />
             Add to Cart
           </Button>
-          <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8">Place Order</Button>
+          <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 flex-1">Place Order</Button>
         </div>
       </div>
       <FsLightbox
