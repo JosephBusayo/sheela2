@@ -92,7 +92,7 @@ export default function CategoryPageClient({ category }: { category: string }) {
 
     const fetchSubCategories = async () => {
       try {
-        const response = await fetch(`/api/subcategories/${category}`);
+    const response = await fetch(`/api/subcategories/by-category/${category}`);
         if (!response.ok) {
           throw new Error("Failed to fetch subcategories");
         }

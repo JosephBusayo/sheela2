@@ -14,7 +14,7 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
-import Header from "@/components/Header";
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Image from "next/image";
 import SizeGuide from "@/components/SizeGuide";
@@ -95,7 +95,7 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
 
         {/* Main Image */}
         <div className="flex-1 w-full">
-          <div className="w-full h-[350px] md:w-[470px] md:h-[600px] lg:w-[520px] lg:h-[600px]">
+          <div className="w-full h-[350px] md:w-[450px] md:h-[600px] lg:w-[520px] lg:h-[600px]">
             <Swiper
               style={{ "--swiper-navigation-color": "#000" } as any}
               spaceBetween={5}

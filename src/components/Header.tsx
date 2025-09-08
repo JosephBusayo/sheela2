@@ -110,7 +110,7 @@ const Header: React.FC = () => {
               <div className="relative flex items-center">
                 <input
                   type="text"
-                  placeholder="Search"
+                  placeholder="Search..."
                   className="border rounded-md py-1 sm:px-2 md:px-2 w-24 md:w-32 transition-all duration-300 ease-in-out"
                   autoFocus
                 />
