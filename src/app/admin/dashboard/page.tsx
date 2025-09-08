@@ -13,6 +13,9 @@ import { ProductManagement } from '@/components/admin/dashboard/ProductManagemen
 import { DashboardHeader } from '@/components/admin/dashboard/DashboardHeader';
 import { CategoryManagement } from '@/components/admin/dashboard/CategoryManagement';
 import { toast } from 'sonner';
+import { ProductInventory } from '@/components/admin/dashboard/ProductInventory';
+import { Product } from '@prisma/client';
+import { ProductWithRelations } from '@/lib/types';
 
 // Types
 interface ProductImage {
@@ -45,30 +48,16 @@ interface SubCategory {
   categoryId: string;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  description?: string;
-  price: string;
-  categoryId: string;
-  subCategoryId?: string;
-  images: ProductImage[];
-  sizes: ProductSize[];
-  colors: ProductColor[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 // Main Dashboard Component
 const SheelaAdminDashboard: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [stagedProducts, setStagedProducts] = useState<Product[]>([]);
+  const [stagedProducts, setStagedProducts] = useState<any[]>([]);
 
  
   // Form state
@@ -128,6 +117,25 @@ const SheelaAdminDashboard: React.FC = () => {
   React.useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await fetch('/api/products/main');
+      if (response.ok) {
+        const data = await response.json();
+        setProducts(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch products', error);
+      toast.error(
+        "Failed to fetch products. Please refresh the page."
+      );
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // Handle image upload
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -230,12 +238,20 @@ const SheelaAdminDashboard: React.FC = () => {
   };
 
   const addProductToList = () => {
-    const newProduct: Product = {
-      id: isEditMode ? selectedProduct!.id : `new-${Date.now()}`,
-      ...formData,
+    const productId = isEditMode ? selectedProduct!.id : `new-${Date.now()}`;
+    const newProduct = {
+      id: productId,
+      name: formData.name,
+      description: formData.description,
+      price: formData.price,
+      categoryId: formData.categoryId,
+      subCategoryId: formData.subCategoryId,
+      images: formData.images.map(image => ({ ...image, productId })),
+      sizes: formData.sizes.map(size => ({ ...size, productId })),
+      colors: formData.colors.map(color => ({ ...color, productId })),
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
+    } as unknown as ProductWithRelations;
 
     if (isEditMode) {
       setProducts(prev => prev.map(p => p.id === newProduct.id ? newProduct : p));
@@ -251,7 +267,7 @@ const SheelaAdminDashboard: React.FC = () => {
     try {
       for (const stagedProduct of stagedProducts) {
         const uploadedImages = await Promise.all(
-          stagedProduct.images.map(async (image) => {
+          stagedProduct.images.map(async (image: any) => {
             if (image.file) {
               const formData = new FormData();
               formData.append('file', image.file);
@@ -278,7 +294,7 @@ const SheelaAdminDashboard: React.FC = () => {
           images: uploadedImages,
         };
 
-        const response = await fetch('/api/products', {
+        const response = await fetch('/api/products/main', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -312,14 +328,14 @@ const SheelaAdminDashboard: React.FC = () => {
   };
 
   // Edit product
-  const editProduct = (product: Product) => {
+  const editProduct = (product: ProductWithRelations) => {
     setFormData({
       name: product.name,
       description: product.description || '',
       price: product.price,
       categoryId: product.categoryId,
       subCategoryId: product.subCategoryId || '',
-      images: product.images,
+      images: product.images.map(img => ({ ...img, alt: img.alt || undefined })),
       sizes: product.sizes,
       colors: product.colors
     });
@@ -418,7 +434,7 @@ const SheelaAdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-6" suppressHydrationWarning={true}>
       <div className="max-w-9xl mx-auto">
         <DashboardHeader />
 
@@ -431,14 +447,7 @@ const SheelaAdminDashboard: React.FC = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dashboard Overview</CardTitle>
-                <CardDescription>
-                  Welcome to your Sheela admin dashboard. Manage your products, track orders, and monitor store performance.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <ProductInventory />
           </TabsContent>
 
           <TabsContent value="products" className="space-y-6">

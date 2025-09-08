@@ -27,6 +27,11 @@ export async function POST(req: Request) {
           })),
         },
       },
+      include: {
+        images: true,
+        sizes: true,
+        colors: true,
+      },
     });
 
     return NextResponse.json(product, { status: 201 });
@@ -66,11 +71,37 @@ export async function PUT(req: Request) {
           })),
         },
       },
+      include: {
+        images: true,
+        sizes: true,
+        colors: true,
+      },
     });
 
     return NextResponse.json(product, { status: 200 });
   } catch (error) {
     console.error('Error updating product:', error);
     return NextResponse.json({ error: 'Error updating product' }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        images: true,
+        sizes: true,
+        colors: true,
+        category: true,
+        subCategory: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return NextResponse.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return NextResponse.json({ error: 'Error fetching products' }, { status: 500 });
   }
 }
