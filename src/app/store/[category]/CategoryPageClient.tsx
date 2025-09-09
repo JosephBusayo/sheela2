@@ -31,6 +31,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Product } from "../../../../stores/useStore";
+
+type ProductWithCounts = Product & {
+  createdAt: string;
+  _count: {
+    cartItems: number;
+    orderItems: number;
+  };
+};
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProductFromDb {
@@ -47,12 +55,14 @@ interface ProductFromDb {
 
 export default function CategoryPageClient({ category }: { category: string }) {
   const [priceRange, setPriceRange] = useState([100, 400]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductWithCounts[]>([]);
+  const [originalProducts, setOriginalProducts] = useState<ProductWithCounts[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [subCategories, setSubCategories] = useState<
     { id: string; name: string }[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [sortOption, setSortOption] = useState("Default sorting");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -65,7 +75,7 @@ export default function CategoryPageClient({ category }: { category: string }) {
         const data = await response.json();
         const { products: productsFromDb, totalProducts } = data;
 
-        const products = productsFromDb.map((product: ProductFromDb) => ({
+        const products = productsFromDb.map((product: ProductFromDb & { createdAt: string; _count: { cartItems: number; orderItems: number } }) => ({
           ...product,
           category: {
             name: product.category.name.toLowerCase() as
@@ -80,8 +90,9 @@ export default function CategoryPageClient({ category }: { category: string }) {
           description:
             product.description === null ? undefined : product.description,
           images: product.images.map((image: { url: string }) => image.url),
-        }));
+        })) as ProductWithCounts[];
         setProducts(products);
+        setOriginalProducts(products);
         setTotalProducts(totalProducts);
       } catch (error) {
         console.error("Failed to fetch products:", error);
@@ -108,6 +119,31 @@ export default function CategoryPageClient({ category }: { category: string }) {
       fetchSubCategories();
     }
   }, [category]);
+
+  const handleSortChange = (option: string) => {
+    setSortOption(option);
+    let sortedProducts = [...products];
+    if (option === "Latest Arrivals") {
+      sortedProducts.sort((a, b) => {
+        // Sort by createdAt descending
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+        return dateB.getTime() - dateA.getTime();
+      });
+      setProducts(sortedProducts);
+    } else if (option === "Trending") {
+      sortedProducts.sort((a, b) => {
+        // Sort by sum of cartItems and orderItems count descending
+        const countA = (a._count?.cartItems ?? 0) + (a._count?.orderItems ?? 0);
+        const countB = (b._count?.cartItems ?? 0) + (b._count?.orderItems ?? 0);
+        return countB - countA;
+      });
+      setProducts(sortedProducts);
+    } else {
+      // Default sorting: reset to original order
+      setProducts(originalProducts);
+    }
+  };
 
   return (
     <div className="">
@@ -206,21 +242,29 @@ export default function CategoryPageClient({ category }: { category: string }) {
         <div className="flex flex-row justify-between md:justify-center items-center gap-2 w-full md:w-auto">
           <h3 className="font-bold mr-1 text-sm md:text-base">Sort by</h3>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex flex-row items-center justify-center font-extralight text-gray-600 text-sm md:text-base"
-              >
-                Default sorting
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>Latest Arrivals</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Trending</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex flex-row items-center justify-center font-extralight text-gray-600 text-sm md:text-base"
+            >
+              {sortOption}
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => handleSortChange("Default sorting")}>
+              Default sorting
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleSortChange("Latest Arrivals")}>
+              Latest Arrivals
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleSortChange("Trending")}>
+              Trending
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         </div>
       </div>
       {isLoading ? (

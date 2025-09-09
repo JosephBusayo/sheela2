@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, Heart, User, ChevronDown, X } from "lucide-react";
 import Image from "next/image";
 import { useStore } from "../../stores/useStore";
@@ -29,9 +30,17 @@ interface NavItem {
 
 const Header: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchQuery.trim() !== "") {
+      router.push(`/store/search?q=${searchQuery}`);
+      setIsSearchOpen(false);
+    }
+  };
 
   // Get cart and favorites count from Zustand store
   const {
@@ -112,6 +121,9 @@ const Header: React.FC = () => {
                   type="text"
                   placeholder="Search..."
                   className="border rounded-md py-1 sm:px-2 md:px-2 w-24 md:w-32 transition-all duration-300 ease-in-out"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearch}
                   autoFocus
                 />
                 <button

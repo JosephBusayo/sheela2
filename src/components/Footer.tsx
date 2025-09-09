@@ -5,10 +5,12 @@ import { Loader2, Send } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from './ui/button';
 import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
 
 const Footer: React.FC = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user, isSignedIn, isLoaded } = useUser();
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,9 +58,12 @@ const Footer: React.FC = () => {
             <p className="text-gray-300 my-6 text-lg font-normal ">
               Seamless orders. Unique designs. Fashion your way.
             </p>
+            <Link href={"/store/women"}>
+
             <Button className="bg-white text-bt-green px-6 py-2 hover:bg-gray-100 transition-colors duration-200 font-medium cursor-pointer border-none shadow-none rounded-none" >
               PLACE YOUR ORDER
             </Button>
+            </Link>
           </div>
 
           {/* Categories */}
@@ -97,6 +102,15 @@ const Footer: React.FC = () => {
                 </li>
               ))}
             </ul>
+            {isSignedIn && isLoaded && (user?.publicMetadata?.role === "admin" ||
+              (Array.isArray(user?.publicMetadata?.roles) && user.publicMetadata.roles.includes("admin"))) && (
+              <div className='flex flex-row mt-6 gap-2'>
+                <h2 className='text-white font-normal'>Admin</h2>
+                <Link href={"/admin/dashboard"} className="text-gray-300 hover:text-white transition-colors duration-200 font-normal underline">
+                  <h3>Dashboard</h3>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Socials */}

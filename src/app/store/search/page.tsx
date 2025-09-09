@@ -1,6 +1,8 @@
 import React from "react";
 import prisma from "@/lib/prisma";
 import SearchPageClient from "./SearchPageClient";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 
 interface SearchPageProps {
@@ -34,7 +36,15 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
     },
   });
 
-  return <SearchPageClient products={products} query={query} />;
+  return (
+  <div className="flex flex-col overflow-x-hidden justify-center items-center px-0">
+    <Header/>
+    <div>
+        <SearchPageClient products={products} query={query} />
+    </div>
+    <Footer/>
+  </div>)
+
 };
 
 export default SearchPage;

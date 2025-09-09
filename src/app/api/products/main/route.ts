@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+
 export async function POST(req: Request) {
   try {
+    
     const data = await req.json();
     const { images, sizes, colors, ...productData } = data;
 
@@ -43,6 +45,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    
     const data = await req.json();
     const { id, images, sizes, colors, ...productData } = data;
 
@@ -87,6 +90,7 @@ export async function PUT(req: Request) {
 
 export async function GET() {
   try {
+    
     const products = await prisma.product.findMany({
       include: {
         images: true,

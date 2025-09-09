@@ -1,4 +1,3 @@
-
 import CategoryPageClient from "./CategoryPageClient";
 
 export default async function CategoryPage({

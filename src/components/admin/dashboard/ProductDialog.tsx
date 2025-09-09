@@ -137,7 +137,7 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
+              <div className=''>
                 <Label htmlFor="category" className='mb-2'>Category *</Label>
                 <Select
                   value={formData.categoryId}

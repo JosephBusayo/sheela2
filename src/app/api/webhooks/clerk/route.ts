@@ -81,7 +81,9 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleUserCreated(data: any) {
-  const { id, email_addresses, first_name, last_name, image_url, phone_numbers } = data
+  const { id, email_addresses, first_name, last_name, image_url, phone_numbers } = data;
+
+  console.log('handleUserCreated called with data:', JSON.stringify(data, null, 2));
 
   try {
     await prisma.user.create({
@@ -93,11 +95,17 @@ async function handleUserCreated(data: any) {
         avatar: image_url || null,
         phone: phone_numbers[0]?.phone_number || null,
       },
-    })
-    console.log(`User created: ${id}`)
-  } catch (error) {
-    console.error('Error creating user:', error)
-    throw error
+    });
+    console.log(`User created: ${id}`);
+  } catch (error: any) {
+    console.error('Error creating user:', error);
+    if (error.code) {
+      console.error('Prisma error code:', error.code);
+    }
+    if (error.meta) {
+      console.error('Prisma error meta:', JSON.stringify(error.meta, null, 2));
+    }
+    throw error;
   }
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ import { toast } from 'sonner';
 import { ProductInventory } from '@/components/admin/dashboard/ProductInventory';
 import { Product } from '@prisma/client';
 import { ProductWithRelations } from '@/lib/types';
+import { v4 as uuidv4 } from 'uuid';
 
 // Types
 interface ProductImage {
@@ -48,8 +50,31 @@ interface SubCategory {
   categoryId: string;
 }
 
-// Main Dashboard Component
 const SheelaAdminDashboard: React.FC = () => {
+  const { user, isSignedIn, isLoaded } = useUser();
+
+  // Admin role check
+  const isAdmin =
+    isSignedIn &&
+    isLoaded &&
+    (user?.publicMetadata?.role === "admin" ||
+      (Array.isArray(user?.publicMetadata?.roles) && user.publicMetadata.roles.includes("admin")));
+
+  if (!isLoaded) {
+    return <div>...</div>;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded shadow text-center">
+          <h1 className="text-2xl font-bold mb-4">Unauthorized</h1>
+          <p>You do not have permission to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+
   const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
@@ -238,7 +263,7 @@ const SheelaAdminDashboard: React.FC = () => {
   };
 
   const addProductToList = () => {
-    const productId = isEditMode ? selectedProduct!.id : `new-${Date.now()}`;
+    const productId = isEditMode ? selectedProduct!.id : uuidv4();
     const newProduct = {
       id: productId,
       name: formData.name,
@@ -273,7 +298,7 @@ const SheelaAdminDashboard: React.FC = () => {
               formData.append('file', image.file);
               formData.append('upload_preset', 'sheela-upload');
 
-              const response = await fetch('https://api.cloudinary.com/v1_1/dhwiem60c/image/upload', {
+              const response = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_SECRET}/image/upload`, {
                 method: 'POST',
                 body: formData,
               });

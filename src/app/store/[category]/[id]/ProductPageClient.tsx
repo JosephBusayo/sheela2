@@ -19,9 +19,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Image from "next/image";
 import SizeGuide from "@/components/SizeGuide";
 import { useStore } from "../../../../../stores/useStore";
+import { useUser, RedirectToSignIn } from "@clerk/nextjs";
+
+// Get WhatsApp number from env
+const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER;
+
+interface ProductSize {
+  id: string;
+  size: string;
+  productId: string;
+}
 
 interface ProductWithImages extends Product {
   images: ProductImage[];
+  sizes: ProductSize[];
 }
 
 interface ProductPageClientProps {
@@ -30,6 +41,8 @@ interface ProductPageClientProps {
 }
 
 const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarProducts }) => {
+  
+  const { isSignedIn } = useUser();
   const pathname = usePathname();
   const category = pathname.split("/")[2];
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
@@ -38,6 +51,9 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
     toggler: false,
     slide: 1,
   });
+  const [selectedFabric, setSelectedFabric] = useState<string>("same");
+  const [selectedSize, setSelectedSize] = useState<string>("xs");
+  const [shouldRedirectToSignIn, setShouldRedirectToSignIn] = useState(false);
 
   function openLightboxOnSlide(number: number) {
     setLightboxController({
@@ -47,15 +63,41 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
   }
 const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore();
 
-   const handleAddToCart = () => {
+  const handleAddToCart = () => {
     const productToAdd = {
       ...product,
       images: product.images.map((image) => image.url),
+      sizes: product.sizes.map((s) => s.size),
       category: { name: category as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics' },
     };
-    addToCart(productToAdd);
+    addToCart(productToAdd, selectedSize, undefined, quantity, selectedFabric);
     toast.success(`${product.name} has been added to your cart.`);
   };
+
+  const handlePlaceOrder = () => {
+    if (!isSignedIn) {
+      setShouldRedirectToSignIn(true);
+      return;
+    }
+    if (!whatsappNumber) {
+      toast.error("WhatsApp number not configured.");
+      return;
+    }
+    const message = `Hello, I would like to place an order:\n
+Product: ${product.name}
+Price: ${product.price}
+Quantity: ${quantity}
+Size: ${selectedSize.toUpperCase()}
+Fabric: ${selectedFabric === "same" ? "Maintain Same Fabric" : "Custom Fabric"}
+Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
+
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  };
+
+  if (shouldRedirectToSignIn) {
+    return <RedirectToSignIn signInForceRedirectUrl={pathname} />;
+  }
 
   return (
     
@@ -124,14 +166,14 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
       <div className="lg:ml-20">
         <h1 className="text-2xl font-semibold mb-2">{product.name}</h1>
         <p className="text-lg font-bold text-gray-800 mb-4">
-          {product.price}
+          ₦{product.price}
         </p>
 
         <p className="text-sm text-gray-600 mb-6">{product.description}</p>
           {/* Fabric Select */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Select Fabric Type</label>
-          <Select>
+          <Select value={selectedFabric} onValueChange={setSelectedFabric}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Maintain Same Fabric" />
             </SelectTrigger>
@@ -149,17 +191,22 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
             <SizeGuide />
             
           </div>
-          <Select>
+          <Select value={selectedSize} onValueChange={setSelectedSize}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="XS" />
+              <SelectValue placeholder="Select Size" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="xs">XS</SelectItem>
-              <SelectItem value="s">S</SelectItem>
-              <SelectItem value="m">M</SelectItem>
-              <SelectItem value="l">L</SelectItem>
-              <SelectItem value="xl">XL</SelectItem>
-              <SelectItem value="xxl">XXL</SelectItem>
+              {product.sizes && product.sizes.length > 0 ? (
+                product.sizes.map((sizeObj) => (
+                  <SelectItem key={sizeObj.id} value={sizeObj.size}>
+                    {sizeObj.size.toUpperCase()}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="no-sizes" disabled>
+                  No sizes available
+                </SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -200,7 +247,7 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
             <Image src={"/bag-2.svg"} alt="package" width={14} height={14} />
             Add to Cart
           </Button>
-          <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 flex-1">Place Order</Button>
+          <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 flex-1" onClick={handlePlaceOrder}>Place Order</Button>
         </div>
       </div>
       <FsLightbox

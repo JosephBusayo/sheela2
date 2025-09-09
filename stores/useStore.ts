@@ -21,6 +21,7 @@ export interface CartItem extends Product {
   quantity: number;
   selectedSize?: string;
   selectedColor?: string;
+  selectedFabric?: string;
 }
 
 interface StoreState {
@@ -31,7 +32,7 @@ interface StoreState {
 
   // Cart functionality
   cartItems: CartItem[];
-  addToCart: (product: Product, size?: string, color?: string) => void;
+  addToCart: (product: Product, size?: string, color?: string, quantity?: number, fabric?: string) => void;
   removeFromCart: (productId: string, size?: string, color?: string) => void;
   updateQuantity: (productId: string, quantity: number, size?: string, color?: string) => void;
   clearCart: () => void;
@@ -74,7 +75,7 @@ export const useStore = create<StoreState>()(
       cartItems: [],
       favorites: [],
 
-      addToCart: async (product, size, color) => {
+      addToCart: async (product, size, color, quantity = 1, fabric) => {
         const state = get();
         
         if (state.isLoggedIn && state.userId) {
@@ -85,9 +86,10 @@ export const useStore = create<StoreState>()(
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 productId: product.id,
-                quantity: 1,
+                quantity,
                 selectedSize: size,
                 selectedColor: color,
+                selectedFabric: fabric,
               }),
             });
 
@@ -105,14 +107,14 @@ export const useStore = create<StoreState>()(
           // Add to local state
           set((state) => {
             const existingItemIndex = state.cartItems.findIndex(
-              (item) => item.id === product.id && item.selectedSize === size && item.selectedColor === color
+              (item) => item.id === product.id && item.selectedSize === size && item.selectedColor === color && item.selectedFabric === fabric
             );
 
             if (existingItemIndex >= 0) {
               const updatedItems = [...state.cartItems];
               updatedItems[existingItemIndex] = {
                 ...updatedItems[existingItemIndex],
-                quantity: updatedItems[existingItemIndex].quantity + 1
+                quantity: updatedItems[existingItemIndex].quantity + quantity
               };
               return { cartItems: updatedItems };
             }
@@ -120,7 +122,7 @@ export const useStore = create<StoreState>()(
             return {
               cartItems: [
                 ...state.cartItems,
-                { ...product, quantity: 1, selectedSize: size, selectedColor: color },
+                { ...product, quantity, selectedSize: size, selectedColor: color, selectedFabric: fabric },
               ],
             };
           });

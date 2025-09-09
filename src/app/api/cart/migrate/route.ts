@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { useUser } from '@clerk/nextjs'
 import { CartMigrationService } from '@/lib/cart-migration'
+
 export async function POST(request: NextRequest) {
     const {user} = useUser()
   try {
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
+    
     const body = await request.json()
     const { cartItems, favorites } = body
 
