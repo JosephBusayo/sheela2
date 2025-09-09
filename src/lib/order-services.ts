@@ -31,7 +31,6 @@ export class OrderService {
         total: 0,
         shipping: 0,
         notes,
-        addressId,
         items: {
           create: cartItems.map(item => ({
             productId: item.productId,
@@ -47,7 +46,6 @@ export class OrderService {
           include: { product: true },
         },
         user: true,
-        address: true,
       },
     })
 

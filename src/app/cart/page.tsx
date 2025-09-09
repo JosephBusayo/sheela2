@@ -13,7 +13,6 @@ export default async function CartPage() {
     category: {
       name: p.category.name as "women" | "men" | "kids" | "unisex" | "fabrics",
     },
-    originalPrice: p.originalPrice === null ? undefined : p.originalPrice,
     description: p.description === null ? undefined : p.description,
   }));
   return (

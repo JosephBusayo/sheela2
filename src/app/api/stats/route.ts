@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const numListings = await prisma.product.count();
     const itemsInCart = await prisma.cartItem.count();
-    const websiteVisits = await prisma.websiteVisit.count();
+    // const websiteVisits = await prisma.websiteVisit.count();
 
     // Placeholders for stats not directly available in the current schema
     let whatsappMessages = 0; 
@@ -13,7 +13,7 @@ export async function GET() {
     return NextResponse.json({
       numListings,
       itemsInCart,
-      websiteVisits,
+      // websiteVisits,
       whatsappMessages,
     });
   } catch (error) {

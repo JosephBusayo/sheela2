@@ -27,6 +27,7 @@ export async function getSimilarProducts(categoryId: string, currentProductId: s
     include: {
       images: true,
       category: true,
+      sizes: true,
     },
     take: 4,
   });

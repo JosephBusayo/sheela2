@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(
-  request: Request,
-  context: { params: Promise<{ category: string }> }
-) {
+export async function GET(request: Request) {
   try {
-     const { category } = await context.params;
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
 
     if (!category) {
       return new NextResponse("Category is required", { status: 400 });

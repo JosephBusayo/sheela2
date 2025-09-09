@@ -27,12 +27,13 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { name } = await request.json();
+    const { id } = await params;
     const updatedCategory = await prisma.category.update({
-      where: { id: params.id },
+      where: { id },
       data: { name },
     });
     return NextResponse.json(updatedCategory);

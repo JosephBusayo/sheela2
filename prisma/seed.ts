@@ -67,7 +67,6 @@ async function main() {
         id: product.id,
         name: product.name,
         price: product.price,
-        originalPrice: product.originalPrice,
         description: product.description,
         categoryId: category.id,
         subCategoryId: subCategory ? subCategory.id : null,

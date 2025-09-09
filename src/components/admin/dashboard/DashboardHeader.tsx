@@ -83,7 +83,7 @@ export const DashboardHeader: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statsCards.map((stat, index) => (
             <Card key={index}>
                 <CardContent className="p-4 md:p-6">
@@ -97,7 +97,7 @@ export const DashboardHeader: React.FC = () => {
                 </CardContent>
             </Card>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };

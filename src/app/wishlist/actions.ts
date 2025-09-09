@@ -16,7 +16,6 @@ export async function getProducts() {
 
   return products.map((product) => ({
     ...product,
-    originalPrice: product.originalPrice === null ? undefined : product.originalPrice,
     description: product.description === null ? undefined : product.description,
     images: product.images.map((image) => image.url),
     category: {

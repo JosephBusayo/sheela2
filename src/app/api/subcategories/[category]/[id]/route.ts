@@ -5,10 +5,10 @@ import { Prisma } from '@prisma/client';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const subCategoryId = params.id;
+    const { id: subCategoryId } = await params;
 
     // Check if the subcategory exists
     const subCategory = await prisma.subCategory.findUnique({
