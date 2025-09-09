@@ -24,12 +24,6 @@ export async function GET(
       include: {
         images: true,
         category: true,
-        _count: {
-          select: {
-            cartItems: true,
-            orderItems: true,
-          },
-        },
       },
     });
 

@@ -8,7 +8,8 @@ export async function getProductbyId(id: string) {
       id
     },
     include: {
-      images: true
+      images: true,
+      sizes: true
     }
   });
   if(!product) throw new Error('Product not found');

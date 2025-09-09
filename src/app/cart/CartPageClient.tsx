@@ -170,7 +170,7 @@ export default function CartPageClient() {
             <div className="p-4 rounded-none">
              
              
-              <div className="flex flex-col gap-2 my-2">
+              <div className="flex flex-col gap-2 my-4">
                 <p className="text-sm font-semibold">Made-To-Order Only.</p>
                 <div className="flex flex-row items-center gap-2">
                   <Image
@@ -189,7 +189,32 @@ export default function CartPageClient() {
                   necessary questions.
                 </p>
               </div>
-              <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 w-full">
+              <Button
+                className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 w-full"
+                onClick={() => {
+                  if (cartItems.length === 0) return;
+                  // WhatsApp number from env or fallback
+                  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER || "234XXXXXXXXXX";
+                  // Format cart items for WhatsApp
+                  const itemsText = cartItems
+                    .map(
+                      (item, idx) =>
+                        `${idx + 1}. ${item.name} (Size: ${item.selectedSize || "N/A"}) x${item.quantity} - ₦${item.price} `
+                    )
+                    .join("\n");
+                  const message =
+                    `Hello, I would like to place an order:\n\n` +
+                    itemsText 
+
+
+
+                  const encodedMessage = encodeURIComponent(message);
+                  window.open(
+                    `https://wa.me/${whatsappNumber}?text=${encodedMessage}`,
+                    "_blank"
+                  );
+                }}
+              >
                 Place Order
               </Button>
             </div>

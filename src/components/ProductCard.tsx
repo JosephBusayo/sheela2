@@ -54,7 +54,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               pagination={{ clickable: false }}
               autoplay={{ delay: 4500, disableOnInteraction: true }}
               loop={true}
-              className="w-full sm:w-[400px] md:w-full h-[300px] sm:h-[200px] md:h-[500px] lg:h-[500px] xl:h-[600px] cursor-pointer"
+              className="w-full h-[300px] sm:h-[200px] md:h-[500px] lg:h-[500px] xl:h-[600px] cursor-pointer"
               onClick={() => {
               window.location.href = `/store/product/${product.id}`;
               }}
@@ -70,29 +70,29 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               </SwiperSlide>
               ))}
             </Swiper>
-          <div className="absolute bottom-2 right-2 mb-2 flex flex-row items-center bg-white border-1 border-black/30 z-10">
-            <div className="p-2" onClick={handleToggleFavorite}>
+            <div className="absolute bottom-2 right-2 mb-2 flex flex-row items-center bg-white border-1 border-black/30 z-10">
+            <div className="p-1 sm:p-1 md:p-2" onClick={handleToggleFavorite}>
               <Heart
-                className="w-6 h-6 cursor-pointer"
-                fill={isInFavorites ? "red" : "none"}
-                stroke={isInFavorites ? "red" : "currentColor"}
-                aria-label={
-                  isInFavorites ? "Remove from favorites" : "Add to favorites"
-                }
+              className="w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 cursor-pointer"
+              fill={isInFavorites ? "red" : "none"}
+              stroke={isInFavorites ? "red" : "currentColor"}
+              aria-label={
+                isInFavorites ? "Remove from favorites" : "Add to favorites"
+              }
               />
             </div>
-            <div className="border-l border-gray-300 h-6"></div>
-            <div className="p-2">
+            <div className="border-l border-gray-300 h-5 sm:h-5 md:h-6"></div>
+            <div className="p-1 sm:p-1 md:p-2">
               <Image
-                src="/bag-2.svg"
-                alt="cart icon"
-                className="cursor-pointer"
-                width={24}
-                height={24}
-                onClick={handleAddToCart}
+              src="/bag-2.svg"
+              alt="cart icon"
+              className="cursor-pointer w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6"
+              width={20}
+              height={20}
+              onClick={handleAddToCart}
               />
             </div>
-          </div>
+            </div>
         </CardHeader>
         <CardContent className="px-0 my-0">
           <CardTitle className="font-normal text-gray-900 text-[20px] mb-0 uppercase justify-start flex">
