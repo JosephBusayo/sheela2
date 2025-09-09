@@ -53,6 +53,7 @@ interface SubCategory {
 const SheelaAdminDashboard: React.FC = () => {
   const { user, isSignedIn, isLoaded } = useUser();
 
+
   // Admin role check
   const isAdmin =
     isSignedIn &&
@@ -288,8 +289,15 @@ const SheelaAdminDashboard: React.FC = () => {
   };
 
   // Save all products
-  const saveAllProducts = async () => {
+const saveAllProducts = async () => {
+    
     try {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      if (!cloudName) {
+        console.error("Cloudinary cloud name is not set. Please check your environment variables.");
+       
+        return;
+      }
       for (const stagedProduct of stagedProducts) {
         const uploadedImages = await Promise.all(
           stagedProduct.images.map(async (image: any) => {
@@ -298,7 +306,7 @@ const SheelaAdminDashboard: React.FC = () => {
               formData.append('file', image.file);
               formData.append('upload_preset', 'sheela-upload');
 
-              const response = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_SECRET}/image/upload`, {
+              const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
                 method: 'POST',
                 body: formData,
               });
@@ -349,6 +357,8 @@ const SheelaAdminDashboard: React.FC = () => {
        "An error occurred while saving products. Please try again."
        
       );
+    } finally {
+   
     }
   };
 
@@ -370,9 +380,27 @@ const SheelaAdminDashboard: React.FC = () => {
   };
 
   // Delete product
-  const deleteProduct = (id: string) => {
-    setProducts(prev => prev.filter(p => p.id !== id));
+  const deleteProduct = async (id: string) => {
+    // Remove from staged products (not yet saved to DB)
     setStagedProducts(prev => prev.filter(p => p.id !== id));
+
+    // Remove from DB and local state
+    try {
+      const response = await fetch(`/api/admin/product/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete product");
+      }
+
+      setProducts(prev => prev.filter(p => p.id !== id));
+      return true;
+    } catch (error) {
+      console.error("Failed to delete product", error);
+      return false;
+    }
   };
 
   // Category Management Functions

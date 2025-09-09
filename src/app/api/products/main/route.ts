@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   try {
     
     const data = await req.json();
-    const { images, sizes, colors, ...productData } = data;
+    const { images, sizes, colors, id, ...productData } = data;
 
     const product = await prisma.product.create({
       data: {
