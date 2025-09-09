@@ -182,7 +182,7 @@ const Header: React.FC = () => {
                       alt="User profile"
                       width={32}
                       height={32}
-                      className="rounded-full w-8 h-8"
+                      className="rounded-full w-6 ml-1 h-6 md:w-8 md:h-8 cursor-pointer"
                     />
                   ) : (
                     <div className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
