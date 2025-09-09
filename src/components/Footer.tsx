@@ -36,7 +36,8 @@ const Footer: React.FC = () => {
     { name: 'About Us', href: '/about' },
     { name: 'Help', href: '/contact-us' },
     { name: 'T&Cs', href: '/terms' },
-    { name: 'Shipping', href: '/shipping' }
+    { name: 'Shipping', href: '/shipping' },
+    { name: 'Return item', href: '/return' }
   ];
 
   const socialLinks = [
