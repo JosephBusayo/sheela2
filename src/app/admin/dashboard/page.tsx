@@ -4,10 +4,8 @@ import React, { useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { ProductDialog } from '@/components/admin/dashboard/ProductDialog';
 import { ProductManagement } from '@/components/admin/dashboard/ProductManagement';
@@ -15,7 +13,7 @@ import { DashboardHeader } from '@/components/admin/dashboard/DashboardHeader';
 import { CategoryManagement } from '@/components/admin/dashboard/CategoryManagement';
 import { toast } from 'sonner';
 import { ProductInventory } from '@/components/admin/dashboard/ProductInventory';
-import { Product } from '@prisma/client';
+
 import { ProductWithRelations } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -51,30 +49,8 @@ interface SubCategory {
 }
 
 const SheelaAdminDashboard: React.FC = () => {
+  
   const { user, isSignedIn, isLoaded } = useUser();
-
-
-  // Admin role check
-  const isAdmin =
-    isSignedIn &&
-    isLoaded &&
-    (user?.publicMetadata?.role === "admin" ||
-      (Array.isArray(user?.publicMetadata?.roles) && user.publicMetadata.roles.includes("admin")));
-
-  if (!isLoaded) {
-    return <div>...</div>;
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-white p-8 rounded shadow text-center">
-          <h1 className="text-2xl font-bold mb-4">Unauthorized</h1>
-          <p>You do not have permission to access this page.</p>
-        </div>
-      </div>
-    );
-  }
 
   const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -85,7 +61,6 @@ const SheelaAdminDashboard: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [stagedProducts, setStagedProducts] = useState<any[]>([]);
 
- 
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -105,22 +80,7 @@ const SheelaAdminDashboard: React.FC = () => {
     })
   );
 
-  // Reset form
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      categoryId: '',
-      subCategoryId: '',
-      images: [],
-      sizes: [],
-      colors: []
-    });
-    setSelectedProduct(null);
-    setIsEditMode(false);
-  };
-
+  // ALL CALLBACKS AND EFFECTS MUST ALSO BE AT THE TOP
   const fetchCategories = useCallback(async () => {
     try {
       const response = await fetch('/api/categories');
@@ -133,16 +93,10 @@ const SheelaAdminDashboard: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch categories', error);
       toast.error(
-       
         "Failed to fetch categories. Please refresh the page."
-        
       );
     }
-  }, [toast]);
-
-  React.useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -159,10 +113,6 @@ const SheelaAdminDashboard: React.FC = () => {
     }
   }, []);
 
-  React.useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
   // Handle image upload
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -172,8 +122,7 @@ const SheelaAdminDashboard: React.FC = () => {
     for (const file of files) {
       if (file.size > sizeLimit) {
         toast.error(
-          `File ${file.name} is too large. The maximum size is 5MB.`,
-          
+          `File ${file.name} is too large. The maximum size is 5MB.`
         );
         continue;
       }
@@ -190,7 +139,54 @@ const SheelaAdminDashboard: React.FC = () => {
       ...prev,
       images: [...prev.images, ...newImages]
     }));
-  }, [formData.images.length, toast]);
+  }, [formData.images.length]);
+
+  React.useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  React.useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // Admin role check - moved after all hooks
+  const isAdmin =
+    isSignedIn &&
+    isLoaded &&
+    (user?.publicMetadata?.role === "admin" ||
+      (Array.isArray(user?.publicMetadata?.roles) && user.publicMetadata.roles.includes("admin")));
+
+  
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded shadow text-center">
+          <h1 className="text-2xl font-bold mb-4">Unauthorized</h1>
+          <p>You do not have permission to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      categoryId: '',
+      subCategoryId: '',
+      images: [],
+      sizes: [],
+      colors: []
+    });
+    setSelectedProduct(null);
+    setIsEditMode(false);
+  };
 
   // Handle drag end for images
   const handleDragEnd = (event: any) => {
@@ -289,15 +285,14 @@ const SheelaAdminDashboard: React.FC = () => {
   };
 
   // Save all products
-const saveAllProducts = async () => {
-    
+  const saveAllProducts = async () => {
     try {
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
       if (!cloudName) {
         console.error("Cloudinary cloud name is not set. Please check your environment variables.");
-       
         return;
       }
+      
       for (const stagedProduct of stagedProducts) {
         const uploadedImages = await Promise.all(
           stagedProduct.images.map(async (image: any) => {
@@ -341,24 +336,16 @@ const saveAllProducts = async () => {
         } else {
           const errorText = await response.text();
           console.error(`Error saving product ${stagedProduct.id}:`, errorText);
-          
         }
       }
 
       setStagedProducts([]);
       resetForm();
       setIsAddProductOpen(false);
-      toast.success(
-        "All products have been saved successfully.",
-      );
+      toast.success("All products have been saved successfully.");
     } catch (error) {
       console.error('Error saving products:', error);
-      toast(
-       "An error occurred while saving products. Please try again."
-       
-      );
-    } finally {
-   
+      toast.error("An error occurred while saving products. Please try again.");
     }
   };
 
@@ -414,20 +401,14 @@ const saveAllProducts = async () => {
 
       if (response.ok) {
         await fetchCategories();
-        toast.success(
-           `Category "${name}" has been added successfully.`,
-        );
+        toast.success(`Category "${name}" has been added successfully.`);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to add category');
       }
     } catch (error: any) {
       console.error('Error adding category:', error);
-      toast.error(
-        
-       "Failed to add category. Please try again.",
-        
-      );
+      toast.error("Failed to add category. Please try again.");
     }
   };
 
@@ -441,20 +422,14 @@ const saveAllProducts = async () => {
 
       if (response.ok) {
         await fetchCategories();
-        toast.success(
-          `Subcategory "${name}" has been added successfully.`,
-        );
+        toast.success(`Subcategory "${name}" has been added successfully.`);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to add subcategory');
       }
     } catch (error: any) {
       console.error('Error adding subcategory:', error);
-      toast.error(
-        
-   `Failed to add subcategory. Please try again. ${error.message}`,
-        
-      );
+      toast.error(`Failed to add subcategory. Please try again. ${error.message}`);
     }
   };
 
@@ -547,8 +522,6 @@ const saveAllProducts = async () => {
           </TabsContent>
         </Tabs>
       </div>
-      
-     
     </div>
   );
 };

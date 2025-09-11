@@ -1,4 +1,3 @@
-
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
@@ -85,20 +84,56 @@ async function handleUserCreated(data: any) {
 
   console.log('handleUserCreated called with data:', JSON.stringify(data, null, 2));
 
+  // Better error handling and validation
+  const email = email_addresses?.[0]?.email_address;
+  if (!email) {
+    console.error('No email address found in webhook data');
+    throw new Error('Email address is required');
+  }
+
   try {
-    await prisma.user.create({
-      data: {
-        id: id,
-        email: email_addresses[0]?.email_address || '',
-        firstName: first_name || null,
-        lastName: last_name || null,
-        avatar: image_url || null,
-        phone: phone_numbers[0]?.phone_number || null,
-      },
+    const userData = {
+      id: id,
+      email: email,
+      firstName: first_name || null,
+      lastName: last_name || null,
+      avatar: image_url || null,
+      phone: phone_numbers?.[0]?.phone_number || null,
+    };
+
+    console.log('Creating user with data:', userData);
+
+    const user = await prisma.user.create({
+      data: userData,
     });
-    console.log(`User created: ${id}`);
+    
+    console.log(`User created successfully:`, user);
   } catch (error: any) {
     console.error('Error creating user:', error);
+    
+    // More detailed error logging
+    if (error.code === 'P2002') {
+      console.error('Unique constraint violation - user may already exist');
+      // You might want to try updating instead of creating
+      try {
+        const updatedUser = await prisma.user.update({
+          where: { id: id },
+          data: {
+            email: email,
+            firstName: first_name || null,
+            lastName: last_name || null,
+            avatar: image_url || null,
+            phone: phone_numbers?.[0]?.phone_number || null,
+          },
+        });
+        console.log(`User updated instead:`, updatedUser);
+        return;
+      } catch (updateError) {
+        console.error('Error updating user:', updateError);
+        throw updateError;
+      }
+    }
+    
     if (error.code) {
       console.error('Prisma error code:', error.code);
     }
@@ -112,23 +147,30 @@ async function handleUserCreated(data: any) {
 async function handleUserUpdated(data: any) {
   const { id, email_addresses, first_name, last_name, image_url, phone_numbers } = data
 
+  // Better validation
+  const email = email_addresses?.[0]?.email_address;
+  if (!email) {
+    console.error('No email address found in webhook data');
+    throw new Error('Email address is required');
+  }
+
   try {
     await prisma.user.upsert({
       where: { id },
       update: {
-        email: email_addresses[0]?.email_address || '',
+        email: email,
         firstName: first_name || null,
         lastName: last_name || null,
         avatar: image_url || null,
-        phone: phone_numbers[0]?.phone_number || null,
+        phone: phone_numbers?.[0]?.phone_number || null,
       },
       create: {
         id: id,
-        email: email_addresses[0]?.email_address || '',
+        email: email,
         firstName: first_name || null,
         lastName: last_name || null,
         avatar: image_url || null,
-        phone: phone_numbers[0]?.phone_number || null,
+        phone: phone_numbers?.[0]?.phone_number || null,
       },
     })
     console.log(`User updated: ${id}`)

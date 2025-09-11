@@ -41,7 +41,7 @@ interface ProductManagementProps {
 }
 
 export const ProductManagement: React.FC<ProductManagementProps> = ({
-  products,
+  products = [],
   categories,
   subCategories,
   resetForm,
@@ -50,7 +50,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
   deleteProduct,
   children,
   isAddProductOpen,
-  stagedProducts,
+  stagedProducts = [],
   saveAllProducts,
 }) => {
   return (

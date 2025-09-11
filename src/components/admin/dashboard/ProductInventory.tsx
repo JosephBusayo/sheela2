@@ -27,7 +27,7 @@ export function ProductInventory() {
         const response = await fetch('/api/products/main');
         if (response.ok) {
           const data = await response.json();
-          setProducts(data);
+          setProducts(Array.isArray(data.products) ? data.products : []);
         }
       } catch (error) {
         console.error('Failed to fetch products', error);
