@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, Heart, User, ChevronDown, X } from "lucide-react";
 import Image from "next/image";
@@ -33,6 +33,8 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const router = useRouter();
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -173,61 +175,79 @@ const Header: React.FC = () => {
             </Link>
 
             {/* User Account */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="relative rounded-full">
-                  {isSignedIn && user ? (
-                    <Image
-                      src={user.imageUrl}
-                      alt="User profile"
-                      width={32}
-                      height={32}
-                      className="rounded-full w-6 ml-1 h-6 md:w-8 md:h-8 cursor-pointer"
-                    />
+            {mounted ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="relative rounded-full">
+                    {isSignedIn && user ? (
+                      <Image
+                        src={user.imageUrl}
+                        alt="User profile"
+                        width={32}
+                        height={32}
+                        className="rounded-full w-6 ml-1 h-6 md:w-8 md:h-8 cursor-pointer"
+                      />
+                    ) : (
+                      <div className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
+                        <User className="w-5 h-5 cursor-pointer" />
+                      </div>
+                    )}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-5">
+                  {isSignedIn ? (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile" className="cursor-pointer w-full">
+                          Profile
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <SignOutButton>
+                          <button className="w-full text-left cursor-pointer">
+                            Sign Out
+                          </button>
+                        </SignOutButton>
+                      </DropdownMenuItem>
+                    </>
                   ) : (
-                    <div className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
-                      <User className="w-5 h-5 cursor-pointer" />
-                    </div>
+                    <>
+                      <DropdownMenuItem asChild className="w-auto">
+                        <SignInButton mode="modal">
+                          <button className="w-full text-left cursor-pointer">
+                            Sign In
+                          </button>
+                        </SignInButton>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <SignUpButton mode="modal">
+                          <button className="w-full text-left cursor-pointer">
+                            Sign Up
+                          </button>
+                        </SignUpButton>
+                      </DropdownMenuItem>
+                    </>
                   )}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-5">
-                {isSignedIn ? (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer w-full">
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <SignOutButton>
-                        <button className="w-full text-left cursor-pointer">
-                          Sign Out
-                        </button>
-                      </SignOutButton>
-                    </DropdownMenuItem>
-                  </>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <button className="relative rounded-full">
+                {isSignedIn && user ? (
+                  <Image
+                    src={user.imageUrl}
+                    alt="User profile"
+                    width={32}
+                    height={32}
+                    className="rounded-full w-6 ml-1 h-6 md:w-8 md:h-8 cursor-pointer"
+                  />
                 ) : (
-                  <>
-                    <DropdownMenuItem asChild className="w-auto">
-                      <SignInButton mode="modal">
-                        <button className="w-full text-left cursor-pointer">
-                          Sign In
-                        </button>
-                      </SignInButton>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <SignUpButton mode="modal">
-                        <button className="w-full text-left cursor-pointer">
-                          Sign Up
-                        </button>
-                      </SignUpButton>
-                    </DropdownMenuItem>
-                  </>
+                  <div className="p-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 cursor-pointer">
+                    <User className="w-5 h-5 cursor-pointer" />
+                  </div>
                 )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}

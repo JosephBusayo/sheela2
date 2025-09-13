@@ -193,8 +193,8 @@ export default function CartPageClient() {
                 className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 w-full"
                 onClick={() => {
                   if (cartItems.length === 0) return;
-                  // WhatsApp number from env or fallback
-                  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER || "234XXXXXXXXXX";
+                  
+                  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER;
                   // Format cart items for WhatsApp
                   const itemsText = cartItems
                     .map(

@@ -63,15 +63,19 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
   }
 const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     const productToAdd = {
       ...product,
       images: product.images.map((image) => image.url),
       sizes: product.sizes.map((s) => s.size),
       category: { name: category as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics' },
     };
-    addToCart(productToAdd, selectedSize, undefined, quantity, selectedFabric);
-    toast.success(`${product.name} has been added to your cart.`);
+    try {
+      await addToCart(productToAdd, selectedSize, undefined, quantity, selectedFabric);
+      toast.success(`${product.name} has been added to your cart.`);
+    } catch (e) {
+      toast.error('Failed to add to cart');
+    }
   };
 
   const handlePlaceOrder = () => {

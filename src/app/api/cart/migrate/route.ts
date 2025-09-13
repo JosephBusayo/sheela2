@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { useUser } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
 import { CartMigrationService } from '@/lib/cart-migration'
 
 export async function POST(request: NextRequest) {
-    const {user} = useUser()
+    const { userId } = await auth()
   try {
     
     
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
@@ -15,12 +15,12 @@ export async function POST(request: NextRequest) {
     const { cartItems, favorites } = body
 
     const result = await CartMigrationService.migrateLocalDataToDatabase(
-      user.id,
+      userId,
       { cartItems, favorites }
     )
 
     if (result.success) {
-      const userData = await CartMigrationService.getUserStoreData(user.id)
+      const userData = await CartMigrationService.getUserStoreData(userId)
       return NextResponse.json({ success: true, data: userData })
     } else {
       return NextResponse.json({ error: 'Migration failed' }, { status: 500 })

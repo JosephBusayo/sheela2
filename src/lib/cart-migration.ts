@@ -16,28 +16,36 @@ export class CartMigrationService {
     try {
       // Migrate cart items
       for (const item of localData.cartItems) {
-        await prisma.cartItem.upsert({
+        const selectedSize = item.selectedSize ?? null
+        const selectedColor = item.selectedColor ?? null
+
+        const existing = await prisma.cartItem.findFirst({
           where: {
-            userId_productId_selectedSize_selectedColor: {
-              userId,
-              productId: item.id,
-              selectedSize: item.selectedSize || '',
-              selectedColor: item.selectedColor || '',
-            },
-          },
-          update: {
-            quantity: {
-              increment: item.quantity,
-            },
-          },
-          create: {
             userId,
             productId: item.id,
-            quantity: item.quantity,
-            selectedSize: item.selectedSize,
-            selectedColor: item.selectedColor,
+            selectedSize,
+            selectedColor,
           },
         })
+
+        if (existing) {
+          await prisma.cartItem.update({
+            where: { id: existing.id },
+            data: {
+              quantity: { increment: item.quantity },
+            },
+          })
+        } else {
+          await prisma.cartItem.create({
+            data: {
+              userId,
+              productId: item.id,
+              quantity: item.quantity,
+              selectedSize,
+              selectedColor,
+            },
+          })
+        }
       }
 
       // Migrate favorites
@@ -83,8 +91,8 @@ export class CartMigrationService {
       cartItems: cartItems.map(item => ({
         ...item.product,
         quantity: item.quantity,
-        selectedSize: item.selectedSize,
-        selectedColor: item.selectedColor,
+        selectedSize: item.selectedSize || null,
+        selectedColor: item.selectedColor || null,
         images: item.product.images.map(img => img.url),
       })),
       favorites: favorites.map(fav => ({

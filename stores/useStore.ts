@@ -62,13 +62,23 @@ export const useStore = create<StoreState>()(
       isLoggedIn: false,
       userId: null,
 
-      setAuthState: (isLoggedIn, userId) => {
+setAuthState: (isLoggedIn, userId) => {
         const previousState = get();
         set({ isLoggedIn, userId });
-        
+
         // Auto-migrate local data when user logs in
         if (isLoggedIn && userId && !previousState.isLoggedIn) {
           get().migrateLocalData();
+        }
+
+        // Always sync from database on sign-in (even if nothing to migrate)
+        if (isLoggedIn && userId) {
+          get().syncWithDatabase();
+        }
+
+        // Clear cart and favorites when user logs out
+        if (!isLoggedIn) {
+          set({ cartItems: [], favorites: [] });
         }
       },
 
@@ -97,11 +107,23 @@ export const useStore = create<StoreState>()(
               // Refresh cart from database
               await get().syncWithDatabase();
             } else {
-              throw new Error('Failed to add to cart');
+              console.warn('Add to cart failed, falling back to local state');
+              set((state) => ({
+                cartItems: [
+                  ...state.cartItems,
+                  { ...product, quantity, selectedSize: size, selectedColor: color, selectedFabric: fabric },
+                ],
+              }));
             }
           } catch (error) {
             console.error('Failed to add to cart:', error);
             // Fallback to local storage
+            set((state) => ({
+              cartItems: [
+                ...state.cartItems,
+                { ...product, quantity, selectedSize: size, selectedColor: color, selectedFabric: fabric },
+              ],
+            }));
           }
         } else {
           // Add to local state
@@ -216,7 +238,7 @@ export const useStore = create<StoreState>()(
         
         if (state.isLoggedIn && state.userId) {
           try {
-            const response = await fetch('/api/favorites', {
+            const response = await fetch('/api/favourites', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ productId: product.id }),
@@ -224,9 +246,21 @@ export const useStore = create<StoreState>()(
 
             if (response.ok) {
               await get().syncWithDatabase();
+            } else {
+              console.warn('Add to favourites failed, falling back to local state');
+              if (!get().favorites.some((p) => p.id === product.id)) {
+                set((state) => ({
+                  favorites: [...state.favorites, product],
+                }));
+              }
             }
           } catch (error) {
             console.error('Failed to add to favorites:', error);
+            if (!get().favorites.some((p) => p.id === product.id)) {
+              set((state) => ({
+                favorites: [...state.favorites, product],
+              }));
+            }
           }
         } else {
           // Avoid duplicates in local state
@@ -242,7 +276,7 @@ export const useStore = create<StoreState>()(
         const state = get();
         if (state.isLoggedIn && state.userId) {
           try {
-            const response = await fetch(`/api/favorites?productId=${productId}`, {
+            const response = await fetch(`/api/favourites?productId=${productId}`, {
               method: 'DELETE',
             });
             if (response.ok) {
@@ -268,12 +302,14 @@ export const useStore = create<StoreState>()(
           try {
             const [cartRes, favoritesRes] = await Promise.all([
               fetch('/api/cart'),
-              fetch('/api/favorites'),
+              fetch('/api/favourites'),
             ]);
             if (cartRes.ok && favoritesRes.ok) {
               const cartData = await cartRes.json();
               const favoritesData = await favoritesRes.json();
-              set({ cartItems: cartData.cartItems || [], favorites: favoritesData.favorites || [] });
+              const cartItems = Array.isArray(cartData) ? cartData : cartData.cartItems;
+              const favorites = Array.isArray(favoritesData) ? favoritesData : favoritesData.favorites;
+              set({ cartItems: cartItems || [], favorites: favorites || [] });
             }
           } catch (error) {
             console.error('Failed to sync with database:', error);

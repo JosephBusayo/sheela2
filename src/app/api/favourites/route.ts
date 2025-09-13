@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma';
 import { auth } from '@clerk/nextjs/server';
+import { getOrCreateUser } from '@/lib/getOrCreateUser';
 
 export async function GET() {
   try {
@@ -9,6 +10,9 @@ export async function GET() {
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Ensure user exists
+    await getOrCreateUser()
 
     const favorites = await prisma.favorite.findMany({
       where: { userId: userId },
@@ -24,7 +28,7 @@ export async function GET() {
       images: fav.product.images.map(img => img.url),
     }))
 
-    return NextResponse.json(formattedFavorites)
+    return NextResponse.json({ favorites: formattedFavorites })
   } catch (error) {
     console.error('Get favorites error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -38,10 +42,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Ensure user exists
+    await getOrCreateUser()
+
     const { productId } = await request.json()
 
-    const favorite = await prisma.favorite.create({
-      data: {
+    if (!productId) {
+      return NextResponse.json({ error: 'productId is required' }, { status: 400 })
+    }
+
+    const product = await prisma.product.findUnique({ where: { id: productId }, include: { images: true }})
+    if (!product) {
+      return NextResponse.json({ error: 'Invalid productId' }, { status: 400 })
+    }
+
+    const favorite = await prisma.favorite.upsert({
+      where: {
+        userId_productId: {
+          userId,
+          productId,
+        },
+      },
+      update: {},
+      create: {
         userId: userId,
         productId,
       },
@@ -69,6 +92,9 @@ export async function DELETE(request: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Ensure user exists
+    await getOrCreateUser()
 
     const { searchParams } = new URL(request.url)
     const productId = searchParams.get('productId')
