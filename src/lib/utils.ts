@@ -33,44 +33,37 @@ export function cn(...inputs: ClassValue[]) {
 export const sampleProducts: Product[] = [
   {
     id: 'sm001',
-    name: 'SMOO1 - SENATOR',
-    price: "$299 - $350",
-    originalPrice: 40000,
+    name: 'ZEBRA PRINT ADIRE',
+    price: "$400",
     images: [
-      '/images/senator-1.png',
-      '/images/model1.png',
-      '/images/senator-2.png'
+     "/images/product1.png",
     ],
-    category: { name: 'men' },
-    subCategory: 'Senator',
+    category: { name: 'women' },
+    subCategory: 'Kaftans & Abayas',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: ['Cream', 'White', 'Navy'],
     description: 'Classic Nigerian senator wear made from premium cotton fabric'
   },
   {
-    id: 'sw001',
-    name: 'SWO01 - ADIRE',
-    price: "$299 - $350",
-    originalPrice: 39000,
+    id: 'sw002',
+    name: 'MUDCLOTH PATTERN',
+    price: "$400",
     images: [
-      '/images/model1.png',
-      '/images/adire-1.png',
-      '/images/adire-2.png'
+      "/images/product2.png",
     ],
-    category: { name: 'women' },
-    subCategory: 'Dresses',
+    category: { name: 'men' },
+    subCategory: 'Jackets & Outerwear',
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     colors: ['Blue', 'Indigo', 'Navy'],
     description: 'Beautiful traditional Adire dress with modern cut'
   },
   {
-    id: 'sw002',
-    name: 'SWO02 - ANKARA',
-    price: "33000",
+    id: 'sf002',
+    name: 'FLYING BIRD PATTERN',
+    price: "$400",
     images: [
-      '/images/ankara-1.png',
-      '/images/ankara-2.png',
-      '/images/ankara-3.png'
+      '/images/product3.png',
+     
     ],
     category: { name: 'women' },
     subCategory: 'Dresses',
@@ -80,11 +73,11 @@ export const sampleProducts: Product[] = [
   },
   {
     id: 'st001',
-    name: 'STO01 - SILK BLOUSE',
-    price: "25000",
+    name: 'ANGELIC PATTER',
+    price: "$400",
     images: [
-      '/images/model2.png',
-      '/images/model3.png',
+      '/images/product4.png',
+      
     ],
     category: { name: 'women' },
     subCategory: 'Tops & Blouses',
@@ -92,32 +85,5 @@ export const sampleProducts: Product[] = [
     colors: ['Ivory', 'Black', 'Champagne'],
     description: 'Elegant silk blouse for a sophisticated look.'
   },
-  {
-    id: 'sk001',
-    name: 'SKO01 - EMBROIDERED KAFTAN',
-    price: "45000",
-    images: [
-      '/images/model4.png',
-      '/images/model5.jpg',
-    ],
-    category: { name: 'women' },
-    subCategory: 'Kaftans & Abayas',
-    sizes: ['One Size'],
-    colors: ['Gold', 'Silver', 'Emerald'],
-    description: 'Luxurious kaftan with intricate embroidery.'
-  },
-  {
-    id: 'sj001',
-    name: 'SJO01 - ANKARA JACKET',
-    price: "38000",
-    images: [
-      '/images/model6.png',
-      '/images/model8.png',
-    ],
-    category: { name: 'women' },
-    subCategory: 'Jackets & Outerwear',
-    sizes: ['S', 'M', 'L', 'XL'],
-    colors: ['Multi-color'],
-    description: 'Stylish and versatile Ankara jacket.'
-  },
+ 
 ];

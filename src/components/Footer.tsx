@@ -27,9 +27,7 @@ const Footer: React.FC = () => {
   const categories = [
     { name: 'Women', href: '/store/women' },
     { name: 'Men', href: '/store/men' },
-    { name: 'Kids', href: '/store/kids' },
-    { name: 'Unisex', href: '/store/unisex' },
-    { name: 'Fabrics', href: '/store/fabrics' }
+   
   ];
 
   const quickLinks = [
@@ -57,7 +55,7 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-1 gap-2">
             <Image src="/images/sheela.png" alt='logo' width={120} height={50} />
             <p className="text-gray-300 my-6 text-lg font-normal ">
-              Seamless orders. Unique designs. Fashion your way.
+              Handmade Elegance, Straight from Africa
             </p>
             <Link href={"/store/women"}>
 
