@@ -85,5 +85,33 @@ export const sampleProducts: Product[] = [
     colors: ['Ivory', 'Black', 'Champagne'],
     description: 'Elegant silk blouse for a sophisticated look.'
   },
+  {
+    id: 'st002',
+    name: 'ANKARA WAX PRINT',
+    price: "$400",
+    images: [
+      '/images/product6.png',
+      
+    ],
+    category: { name: 'women' },
+    subCategory: 'Tops & Blouses',
+    sizes: ['S', 'M', 'L'],
+    colors: ['Yellow', 'Black', 'Purple', 'Blue'],
+    description: 'Elegant silk blouse for a sophisticated look.'
+  },
+  {
+    id: 'st006',
+    name: 'BATIK BLUR',
+    price: "$400",
+    images: [
+      '/images/product7.png',
+      
+    ],
+    category: { name: 'men' },
+    subCategory: 'Shirts',
+    sizes: ['S', 'M', 'L', 'XL'],
+    colors: ['Ivory', 'Black', 'Champagne'],
+    description: 'Elegant silk outfit for a sophisticated look.'
+  },
  
 ];

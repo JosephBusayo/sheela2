@@ -150,22 +150,22 @@ export default function CategoryPageClient({ category }: { category: string }) {
       <Header />
 
       <section
-        className="w-full md:h-[300px] bg-cover bg-center my-4 flex flex-col justify-center items-center"
+        className="w-full h-1/3 md:h-[300px] bg-cover bg-center my-4 flex flex-col justify-center items-center"
         style={{
-          backgroundImage: `url('/cat-img.png')`,
+          backgroundImage: `url('/cat3.png')`,
         }}
       >
         <div className="sm:max-w-2xl flex flex-col justify-center items-center text-center px-4 sm:px-6 lg:px-8 text-white py-12">
           <div className="relative z-10 flex w-full flex-grow flex-col items-center self-stretch justify-between">
             <div />
             <div className="relative flex w-full flex-col items-center gap-4">
-              <h2 className="text-center !text-[36px] font-bold leading-[50.4px] tracking-[0] text-white">
+              <h2 className="text-center text-2xl md:!text-[36px] font-bold leading-[50.4px] tracking-[0] text-white">
                 {category.toUpperCase()} STYLES
               </h2>
             </div>
           </div>
         </div>
-        <div className="text-white">
+        <div className="text-white text-sm md:lg">
           <BreadCrumb title={category.toUpperCase()} />
         </div>
       </section>
@@ -276,13 +276,13 @@ export default function CategoryPageClient({ category }: { category: string }) {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 overflow-hidden">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 overflow-hidden">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
-      <AdBanner />
+      
       <Footer />
     </div>
   );

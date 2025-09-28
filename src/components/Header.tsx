@@ -57,8 +57,7 @@ const Header: React.FC = () => {
   const navItems: NavItem[] = [
     { label: "Women", hasDropdown: true, link:"/store/women" },
     { label: "Men", hasDropdown: true, link:"/store/men" },
-    { label: "Kids", hasDropdown: true, link:"/store/kids" },
-    { label: "Unisex", hasDropdown: true, link:"/store/unisex" },
+   
   ];
 
   const toggleDropdown = (label: string) => {

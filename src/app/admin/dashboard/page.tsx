@@ -60,6 +60,7 @@ const SheelaAdminDashboard: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [stagedProducts, setStagedProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -100,7 +101,7 @@ const SheelaAdminDashboard: React.FC = () => {
 
   const fetchProducts = useCallback(async () => {
     try {
-      const response = await fetch('/api/products/main');
+      const response = await fetch('/api/admin/product');
       if (response.ok) {
         const data = await response.json();
         setProducts(data);
@@ -259,7 +260,8 @@ const SheelaAdminDashboard: React.FC = () => {
     }));
   };
 
-  const addProductToList = () => {
+  const addProductToList = async () => {
+    setIsLoading(true);
     const productId = isEditMode ? selectedProduct!.id : uuidv4();
     const newProduct = {
       id: productId,
@@ -276,12 +278,34 @@ const SheelaAdminDashboard: React.FC = () => {
     } as unknown as ProductWithRelations;
 
     if (isEditMode) {
-      setProducts(prev => prev.map(p => p.id === newProduct.id ? newProduct : p));
+      try {
+        const response = await fetch(`/api/admin/product/${newProduct.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newProduct),
+        });
+
+        if (response.ok) {
+          const updatedProduct = await response.json();
+          setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+          toast.success("Product updated successfully.");
+        } else {
+          const errorText = await response.text();
+          console.error(`Error updating product ${newProduct.id}:`, errorText);
+          toast.error("An error occurred while updating the product. Please try again.");
+        }
+      } catch (error) {
+        console.error('Error updating product:', error);
+        toast.error("An error occurred while updating the product. Please try again.");
+      }
     } else {
       setStagedProducts(prev => [...prev, newProduct]);
     }
     resetForm();
     setIsAddProductOpen(false);
+    setIsLoading(false);
   };
 
   // Save all products
@@ -507,6 +531,7 @@ const SheelaAdminDashboard: React.FC = () => {
                 removeColor={removeColor}
                 onConfirm={addProductToList}
                 sensors={sensors}
+                isLoading={isLoading}
               />
             </ProductManagement>
           </TabsContent>

@@ -71,7 +71,7 @@ export function ProductInventory() {
                       <span className="text-sm text-muted-foreground line-clamp-2">{product.description}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell"><span className="">₦</span>{product.price}</TableCell>
+                  <TableCell className="hidden md:table-cell"><span className="">$</span>{product.price}</TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1">
                       {product.sizes.map((size, index) => (

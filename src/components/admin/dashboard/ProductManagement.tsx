@@ -78,6 +78,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
                   resetForm();
                   setIsAddProductOpen(true);
                 }}
+                className="cursor-pointer bg-bt-green hover:bg-green-900"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
@@ -87,7 +88,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {products.length === 0 && stagedProducts.length === 0 ? (
+            {(!Array.isArray(products) || products.length === 0) && (!Array.isArray(stagedProducts) || stagedProducts.length === 0) ? (
               <div className="text-center py-12">
                 <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-500">
@@ -95,8 +96,11 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                {[...products, ...stagedProducts].map((product) => {
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                {[
+                  ...(Array.isArray(products) ? products : []),
+                  ...(Array.isArray(stagedProducts) ? stagedProducts : []),
+                ].map((product) => {
                   const category = categories.find(
                     (c) => c.id === product.categoryId
                   );
@@ -107,12 +111,14 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
                   return (
                     <Card
                       key={product.id}
-                      className="overflow-hidden bg-white border-gray-200"
+                      className="overflow-hidden bg-white border-gray-200 p-0"
                     >
-                      <div className="aspect-square relative w-full h-[300px] sm:h-[200px] md:h-[400px] cursor-pointer">
+                      <div className="relative w-full h-[200px] md:h-[300px] cursor-pointer">
                         <img
                           src={
-                            product.images[0]?.url || "/api/placeholder/300/300"
+                            Array.isArray(product.images) && product.images.length > 0
+                              ? product.images[0].url
+                              : "/api/placeholder/300/300"
                           }
                           alt={product.name}
                           className="w-full h-full object-cover"
@@ -121,7 +127,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
                           <Button
                             size="sm"
                             variant="secondary"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 cursor-pointer"
                             onClick={() => editProduct(product)}
                           >
                             <Edit className="h-4 w-4" />
@@ -129,7 +135,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="h-8 w-8 p-0"
+                            className="h-8 w-8 p-0 cursor-pointer"
                             onClick={() => deleteProduct(product.id)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -141,7 +147,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
                           {product.name}
                         </h3>
                         <p className="text-2xl font-bold text-green-600 mb-2">
-                          {product.price}
+                          ${product.price}
                         </p>
                         <div className="flex gap-2 mb-2">
                           <Badge variant="outline">{category?.name}</Badge>

@@ -70,6 +70,7 @@ interface ProductDialogProps {
   removeColor: (id: string) => void;
   onConfirm: () => void;
   sensors: any;
+  isLoading: boolean;
 }
 
 export const ProductDialog: React.FC<ProductDialogProps> = ({
@@ -88,6 +89,7 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
   removeColor,
   onConfirm,
   sensors,
+  isLoading,
 }) => {
   const filteredSubCategories = subCategories.filter(sub => sub.categoryId === formData.categoryId);
 
@@ -130,7 +132,7 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
               <Label htmlFor="price" className='mb-2'>Price *</Label>
               <Input
                 id="price"
-                placeholder="Enter Price Range(e.g., 10,000 - 15,000)"
+                placeholder="Enter Price (e.g. 100)"
                 value={formData.price}
                 onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
               />
@@ -213,10 +215,9 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
                 {formData.sizes.map(size => (
                   <Badge key={size.id} variant="secondary" className="flex items-center gap-1">
                     {size.size}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
-                      onClick={() => removeSize(size.id)}
-                    />
+                    <span className="ml-1 cursor-pointer" onClick={() => removeSize(size.id)}>
+                      <X className="h-3 w-3" />
+                    </span>
                   </Badge>
                 ))}
               </div>
@@ -254,10 +255,9 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
                 {formData.colors.map(color => (
                   <Badge key={color.id} variant="secondary" className="flex items-center gap-1">
                     {color.color}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
-                      onClick={() => removeColor(color.id)}
-                    />
+                    <span className="ml-1 cursor-pointer" onClick={() => removeColor(color.id)}>
+                      <X className="h-3 w-3" />
+                    </span>
                   </Badge>
                 ))}
               </div>
@@ -319,7 +319,7 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
           <Button 
             onClick={onConfirm}
             className="bg-green-600 hover:bg-green-700"
-            disabled={!formData.name || !formData.price || !formData.categoryId}
+            disabled={!formData.name || !formData.price || !formData.categoryId || isLoading}
           >
             <Save className="h-4 w-4 mr-2" />
             {isEditMode ? 'Update Product' : 'Add Product to List'}
