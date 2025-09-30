@@ -9,7 +9,9 @@ export async function getProductbyId(id: string) {
     },
     include: {
       images: true,
-      sizes: true
+      sizes: true,
+      colors: true,
+      fabricSamples: true
     }
   });
   if(!product) throw new Error('Product not found');

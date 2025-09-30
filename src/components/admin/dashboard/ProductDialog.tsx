@@ -43,6 +43,12 @@ interface SubCategory {
   categoryId: string;
 }
 
+interface FabricSample {
+  id: string;
+  name: string;
+  image: string;
+}
+
 interface FormData {
   name: string;
   description: string;
@@ -52,6 +58,7 @@ interface FormData {
   images: ProductImage[];
   sizes: ProductSize[];
   colors: ProductColor[];
+  fabricSamples: FabricSample[];
 }
 
 interface ProductDialogProps {
@@ -60,6 +67,7 @@ interface ProductDialogProps {
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   categories: Category[];
   subCategories: SubCategory[];
+  fabricSamples: FabricSample[];
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleDragEnd: (event: any) => void;
   removeImage: (id: string) => void;
@@ -79,6 +87,7 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
   setFormData,
   categories,
   subCategories,
+  fabricSamples,
   handleImageUpload,
   handleDragEnd,
   removeImage,
@@ -259,6 +268,56 @@ export const ProductDialog: React.FC<ProductDialogProps> = ({
                       <X className="h-3 w-3" />
                     </span>
                   </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Fabric Samples */}
+            <div>
+              <Label className='mb-2'>Fabric Samples</Label>
+              <Select
+                onValueChange={(value) => {
+                  const sample = fabricSamples.find(s => s.id === value);
+                  if (sample && !formData.fabricSamples.find(s => s.id === value)) {
+                    setFormData(prev => ({
+                      ...prev,
+                      fabricSamples: [...prev.fabricSamples, sample]
+                    }));
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Fabric Sample" />
+                </SelectTrigger>
+                <SelectContent>
+                  {fabricSamples.map(sample => (
+                    <SelectItem key={sample.id} value={sample.id}>
+                      <div className="flex items-center gap-2">
+                        <img src={sample.image} alt={sample.name} className="h-8 w-8 object-cover rounded" />
+                        <span>{sample.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.fabricSamples.map(sample => (
+                  <div key={sample.id} className="relative">
+                    <img src={sample.image} alt={sample.name} className="h-16 w-16 object-cover rounded" />
+                    <button
+                      type="button"
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-0.5 cursor-pointer"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          fabricSamples: prev.fabricSamples.filter(s => s.id !== sample.id)
+                        }));
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                    <p className="text-xs text-center mt-1">{sample.name}</p>
+                  </div>
                 ))}
               </div>
             </div>

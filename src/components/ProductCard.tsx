@@ -2,11 +2,11 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Heart, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { Product, useStore } from "../../stores/useStore";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { sampleProducts } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;
@@ -36,27 +36,32 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
+    <Link href={`/store/${product.category.name}/${product.id}`}>
     <Card className="w-full mx-auto group p-0 border-0 rounded-none shadow-none mt-4">
       <CardHeader className="relative p-0 m-0">
-        <Image
-          src={product.images[0]}
-          alt={product.name}
-          width={400}
-          height={500}
-          className="object-cover w-full h-[250px] md:h-[400px] lg:h-[500px]"
-        />
+        {product.images && product.images.length > 0 && (
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            width={400}
+            height={500}
+            className="object-cover w-full h-[250px] md:h-[400px] lg:h-[500px]"
+          />
+        )}
        
         <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-400">
           <div> {product.colors && product.colors.length > 0 && (
         <div className="flex items-center space-x-2 mb-2 justify-center">
-          {product.colors.map((color) => (
+          {product.colors.map((color, index) => (
             <button
-              key={color}
+              key={`${product.id}-${color}-${index}`}
               onClick={() => setSelectedColor(color)}
               className={`w-4 h-4 md:w-6 md:h-6 rounded-full border-2 cursor-pointer ${
                 selectedColor === color ? "border-black" : "border-gray-300"
               }`}
-              style={{ backgroundColor: color.toLowerCase() }}
+              style={{
+                backgroundColor: typeof color === "string" ? color.toLowerCase() : "transparent",
+              }}
             ></button>
           ))}
         </div>
@@ -88,24 +93,27 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="block md:hidden mb-2">
           {product.colors && product.colors.length > 0 && (
         <div className="flex items-center space-x-2 mb-2 justify-center">
-          {product.colors.map((color) => (
+          {product.colors.map((color, index) => (
             <button
-              key={color}
+              key={`${product.id}-${color}-${index}`}
               onClick={() => setSelectedColor(color)}
               className={`w-4 h-4 rounded-full border-2 cursor-pointer ${
                 selectedColor === color ? "border-black" : "border-gray-300"
               }`}
-              style={{ backgroundColor: color.toLowerCase() }}
+              style={{
+                backgroundColor: typeof color === "string" ? color.toLowerCase() : "transparent",
+              }}
             ></button>
           ))}
         </div>
         )}
         </div>
        
-        <CardTitle className="text-xs  md:text-lg font-medium">{product.name}</CardTitle>
-        <p className="text-black text-lg">{product.price}</p>
+        <CardTitle className="text-xs  md:text-lg font-medium">{product.name.toUpperCase()}</CardTitle>
+        <p className="text-black text-lg">${product.price}</p>
       </CardContent>
     </Card>
+    </Link>
   );
 };
 

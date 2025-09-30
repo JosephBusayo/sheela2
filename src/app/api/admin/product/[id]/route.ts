@@ -24,9 +24,9 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params;
+  const  { id } = await params;
 
   if (!id) {
     return NextResponse.json({ error: "Product ID is required" }, { status: 400 });
@@ -34,7 +34,7 @@ export async function PATCH(
 
   try {
     const body = await req.json();
-    const { name, description, price, categoryId, subCategoryId, images, sizes, colors } = body;
+    const { name, description, price, categoryId, subCategoryId, images, sizes, colors, fabricSamples } = body;
 
     const updatedProduct = await prisma.product.update({
       where: { id },
@@ -64,6 +64,9 @@ export async function PATCH(
             color: color.color,
           })),
         },
+        fabricSamples: {
+          set: fabricSamples.map((sample: any) => ({ id: sample.id })),
+        },
       },
       include: {
         images: true,
@@ -71,6 +74,7 @@ export async function PATCH(
         colors: true,
         category: true,
         subCategory: true,
+        fabricSamples: true,
       },
     });
 

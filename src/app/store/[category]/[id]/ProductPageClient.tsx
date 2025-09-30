@@ -3,12 +3,15 @@
 import React, { useState } from "react";
 import { usePathname } from "next/navigation";
 import FsLightbox from "fslightbox-react";
+import colorNamer from "color-namer";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Navigation, Thumbs } from "swiper/modules";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Minus, Plus } from "lucide-react";
-import { Product, ProductImage } from "@prisma/client";
+import { ProductImage } from "@prisma/client";
 import { toast } from "sonner";
+import { Product } from "../../../../../stores/useStore";
 
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -20,6 +23,7 @@ import Image from "next/image";
 import SizeGuide from "@/components/SizeGuide";
 import { useStore } from "../../../../../stores/useStore";
 import { useUser, RedirectToSignIn } from "@clerk/nextjs";
+import { FabricSamplesDialog } from "@/components/FabricSamplesDialog";
 
 // Get WhatsApp number from env
 const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER;
@@ -36,10 +40,29 @@ interface ProductColor {
   productId: string;
 }
 
-interface ProductWithImages extends Product {
+interface FabricSample {
+  id: string;
+  name: string;
+  image: string;
+}
+
+interface ProductWithImages {
+  id: string;
+  name: string;
+  price: string;
+  originalPrice?: number | null;
   images: ProductImage[];
+  category: {
+    name: 'women' | 'men' | 'kids' | 'unisex' | 'fabrics';
+  };
+  subCategory?: string;
   sizes: ProductSize[];
   colors: ProductColor[];
+  description?: string | null;
+  selectedColor?: string;
+  createdAt: Date;
+  sales: number;
+  fabricSamples: FabricSample[];
 }
 
 interface ProductPageClientProps {
@@ -63,6 +86,15 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
   const [selectedLength, setSelectedLength] = useState<string>("MEDIUM");
   const [shouldRedirectToSignIn, setShouldRedirectToSignIn] = useState(false);
 
+  const getColorHex = (colorName: string) => {
+    try {
+      const names = colorNamer(colorName);
+      return names.ntc[0].hex;
+    } catch (e) {
+      return '#000000'; // Default to black if color name is not found
+    }
+  };
+
   function openLightboxOnSlide(number: number) {
     setLightboxController({
       toggler: !lightboxController.toggler,
@@ -78,6 +110,8 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
       sizes: product.sizes?.map((s) => s.size) || [],
       colors: product.colors?.map((c) => c.color) || [],
       category: { name: category as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics' },
+      createdAt: product.createdAt,
+      sales: product.sales,
     };
     try {
       await addToCart(productToAdd, selectedSize, selectedColor, quantity);
@@ -237,20 +271,34 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
         {product.colors && product.colors.length > 0 && (
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Select Colour</label>
-            <div className="flex gap-2">
-              {product.colors.map((colorObj) => (
-                <Button
-                  key={colorObj.id}
-                  onClick={() => setSelectedColor(colorObj.color)}
-                  className={`md:w-8 md:h-8 w-4 h-4 rounded-full border-2 ${
-                    selectedColor === colorObj.color ? "border-black" : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: colorObj.color }}
-                />
-              ))}
-            </div>
+            <TooltipProvider>
+              <div className="flex gap-4">
+                {product.colors.map((colorObj) => (
+                  <Tooltip key={colorObj.id}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setSelectedColor(colorObj.color)}
+                        className={`md:w-8 md:h-8 w-4 h-4 rounded-none cursor-pointer border-2 ${
+                          selectedColor === colorObj.color ? "border-b-gray-600" : "border-transparent"
+                        }`}
+                        style={{ backgroundColor: `#${getColorHex(colorObj.color)}` }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{colorObj.color.toLowerCase()}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
           </div>
         )}
+
+        <div className="flex flex-row justify-end">
+           {product.fabricSamples && product.fabricSamples.length > 0 && (
+          <FabricSamplesDialog fabricSamples={product.fabricSamples} />
+        )}
+        </div>
 
 {/* Quantity Selector */}
         <div className="flex items-center gap-3 mb-6">
@@ -270,7 +318,7 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
             <Plus className="md:h-4 h-3 w-3 md:w-4" />
           </Button>
         </div>
-         {/* Shipping Info */}
+        
        
    
 
@@ -282,6 +330,7 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
           </Button>
           <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 flex-1 uppercase" onClick={handlePlaceOrder}>Buy Now</Button>
         </div>
+       
       </div>
       <FsLightbox
         toggler={lightboxController.toggler}

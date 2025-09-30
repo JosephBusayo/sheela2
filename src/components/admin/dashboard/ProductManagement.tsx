@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { Loader2 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Edit, Trash2, Package } from "lucide-react";
 import { ProductWithRelations } from "@/lib/types";
 
@@ -38,6 +39,7 @@ interface ProductManagementProps {
   isAddProductOpen: boolean;
   stagedProducts: ProductWithRelations[];
   saveAllProducts: () => void;
+  isSaving: boolean;
 }
 
 export const ProductManagement: React.FC<ProductManagementProps> = ({
@@ -52,7 +54,23 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
   isAddProductOpen,
   stagedProducts = [],
   saveAllProducts,
+  isSaving,
 }) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<ProductWithRelations | null>(null);
+
+  const handleDeleteClick = (product: ProductWithRelations) => {
+    setProductToDelete(product);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (productToDelete) {
+      deleteProduct(productToDelete.id);
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
+    }
+  };
   return (
     <Dialog open={isAddProductOpen} onOpenChange={setIsAddProductOpen}>
       <Card>
@@ -68,10 +86,17 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
             <div className="flex items-center gap-x-4">
               <Button
                 onClick={saveAllProducts}
-                disabled={stagedProducts.length === 0}
+                disabled={stagedProducts.length === 0 || isSaving}
                 className="cursor-pointer bg-green-600 hover:bg-green-700"
               >
-                Save All Products ({stagedProducts.length})
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  `Save All Products (${stagedProducts.length})`
+                )}
               </Button>
               <Button
                 onClick={() => {
@@ -110,7 +135,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
 
                   return (
                     <Card
-                      key={product.id}
+                      key={product.id || `${product.name}-${Math.random()}`}
                       className="overflow-hidden bg-white border-gray-200 p-0"
                     >
                       <div className="relative w-full h-[200px] md:h-[300px] cursor-pointer">
@@ -136,7 +161,7 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
                             size="sm"
                             variant="destructive"
                             className="h-8 w-8 p-0 cursor-pointer"
-                            onClick={() => deleteProduct(product.id)}
+                            onClick={() => handleDeleteClick(product)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -163,9 +188,9 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
                           </p>
                         )}
                         <div className="flex justify-between items-center text-sm text-gray-500">
-                          <span>{product.images.length} images</span>
-                          <span>{product.sizes.length} sizes</span>
-                          <span>{product.colors.length} colors</span>
+                          <span>{product.images?.length || 0} images</span>
+                          <span>{product.sizes?.length || 0} sizes</span>
+                          <span>{product.colors?.length || 0} colors</span>
                         </div>
                       </CardContent>
                     </Card>
@@ -177,6 +202,26 @@ export const ProductManagement: React.FC<ProductManagementProps> = ({
         </CardContent>
         {children}
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Product</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{productToDelete?.name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

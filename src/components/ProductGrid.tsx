@@ -21,7 +21,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, title }) => {
       {title && <h2 className="text-xl md:text-3xl font-light my-6 text-center tracking-widest px-3">{title}</h2>}
       <Swiper
         className="product-grid-swiper"
-        modules={[Navigation, Autoplay]}
+        modules={[Navigation]}
         navigation
         pagination={{ clickable: true }}
         autoplay={{ delay: 10000, disableOnInteraction: true }}

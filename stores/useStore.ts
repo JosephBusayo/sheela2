@@ -16,6 +16,8 @@ export interface Product {
   colors?: string[];
   description?: string | null;
   selectedColor?: string;
+  createdAt: Date;
+  sales: number;
 }
 
 export interface CartItem extends Product {
@@ -78,7 +80,7 @@ setAuthState: (isLoggedIn, userId) => {
         }
 
         // Clear cart and favorites when user logs out
-        if (!isLoggedIn) {
+        if (previousState.isLoggedIn && !isLoggedIn) {
           set({ cartItems: [], favorites: [] });
         }
       },

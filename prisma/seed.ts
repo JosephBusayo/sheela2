@@ -1,4 +1,4 @@
-import { sampleProducts } from "../src/lib/utils";
+import { sampleProducts } from "../data/products";
 import { PrismaClient } from "@prisma/client";
 import { Product } from "../stores/useStore";
 

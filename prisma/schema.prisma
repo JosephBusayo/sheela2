@@ -52,6 +52,8 @@ model Product {
   subCategoryId String?
   subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id])
 
+  fabricSamples FabricSample[] @relation("ProductFabricSamples")
+
   @@map("products")
 }
 
@@ -190,4 +192,13 @@ model WebsiteVisit {
   timestamp DateTime @default(now())
 
   @@map("website_visits")
+}
+
+model FabricSample {
+  id       String    @id @default(cuid())
+  name     String
+  image    String
+  products Product[] @relation("ProductFabricSamples")
+
+  @@map("fabric_samples")
 }
