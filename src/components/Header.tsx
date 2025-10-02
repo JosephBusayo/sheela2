@@ -117,7 +117,7 @@ const Header: React.FC = () => {
           >
             {/* Search */}
             {isSearchOpen ? (
-              <div className="relative flex items-center">
+              <div className="relative flex items-center" >
                 <input
                   type="text"
                   placeholder="Search..."

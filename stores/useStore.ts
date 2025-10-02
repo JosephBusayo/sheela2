@@ -21,10 +21,11 @@ export interface Product {
 }
 
 export interface CartItem extends Product {
+  cartItemId?: string; // 
   quantity: number;
   selectedSize?: string;
   selectedColor?: string;
-  selectedFabric?: string;
+  selectedLength?: string;
 }
 
 interface StoreState {
@@ -35,9 +36,9 @@ interface StoreState {
 
   // Cart functionality
   cartItems: CartItem[];
-  addToCart: (product: Product, size?: string, color?: string, quantity?: number, fabric?: string) => void;
-  removeFromCart: (productId: string, size?: string, color?: string) => void;
-  updateQuantity: (productId: string, quantity: number, size?: string, color?: string) => void;
+  addToCart: (product: Product, size?: string, color?: string, quantity?: number, length?: string) => void;
+  removeFromCart: (productId: string, size?: string, color?: string, length?: string) => void;
+  updateQuantity: (productId: string, quantity: number, size?: string, color?: string, length?: string) => void;
   clearCart: () => void;
   
   // Favorites functionality
@@ -88,7 +89,7 @@ setAuthState: (isLoggedIn, userId) => {
       cartItems: [],
       favorites: [],
 
-      addToCart: async (product, size, color, quantity = 1, fabric) => {
+      addToCart: async (product, size, color, quantity = 1, length) => {
         const state = get();
         
         if (state.isLoggedIn && state.userId) {
@@ -102,7 +103,7 @@ setAuthState: (isLoggedIn, userId) => {
                 quantity,
                 selectedSize: size,
                 selectedColor: color,
-                selectedFabric: fabric,
+                selectedLength: length,
               }),
             });
 
@@ -114,7 +115,7 @@ setAuthState: (isLoggedIn, userId) => {
               set((state) => ({
                 cartItems: [
                   ...state.cartItems,
-                  { ...product, quantity, selectedSize: size, selectedColor: color, selectedFabric: fabric },
+                  { ...product, quantity, selectedSize: size, selectedColor: color, selectedLength: length },
                 ],
               }));
             }
@@ -124,7 +125,7 @@ setAuthState: (isLoggedIn, userId) => {
             set((state) => ({
               cartItems: [
                 ...state.cartItems,
-                { ...product, quantity, selectedSize: size, selectedColor: color, selectedFabric: fabric },
+                { ...product, quantity, selectedSize: size, selectedColor: color, selectedLength: length },
               ],
             }));
           }
@@ -132,7 +133,7 @@ setAuthState: (isLoggedIn, userId) => {
           // Add to local state
           set((state) => {
             const existingItemIndex = state.cartItems.findIndex(
-              (item) => item.id === product.id && item.selectedSize === size && item.selectedColor === color && item.selectedFabric === fabric
+              (item) => item.id === product.id && item.selectedSize === size && item.selectedColor === color && item.selectedLength === length
             );
 
             if (existingItemIndex >= 0) {
@@ -147,14 +148,14 @@ setAuthState: (isLoggedIn, userId) => {
             return {
               cartItems: [
                 ...state.cartItems,
-                { ...product, quantity, selectedSize: size, selectedColor: color, selectedFabric: fabric },
+                { ...product, quantity, selectedSize: size, selectedColor: color, selectedLength: length },
               ],
             };
           });
         }
       },
 
-      removeFromCart: async (productId, size, color) => {
+      removeFromCart: async (productId, size, color, length) => {
         const state = get();
         
         if (state.isLoggedIn && state.userId) {
@@ -162,7 +163,8 @@ setAuthState: (isLoggedIn, userId) => {
             const queryParams = new URLSearchParams({
               productId,
               ...(size && { size }),
-              ...(color && { color })
+              ...(color && { color }),
+              ...(length && { length })
             });
 
             const response = await fetch(`/api/cart?${queryParams}`, {
@@ -178,15 +180,15 @@ setAuthState: (isLoggedIn, userId) => {
         } else {
           set((state) => ({
             cartItems: state.cartItems.filter((item) => 
-              !(item.id === productId && item.selectedSize === size && item.selectedColor === color)
+              !(item.id === productId && item.selectedSize === size && item.selectedColor === color && item.selectedLength === length)
             ),
           }));
         }
       },
 
-      updateQuantity: async (productId, quantity, size, color) => {
+      updateQuantity: async (productId, quantity, size, color, length) => {
         if (quantity <= 0) {
-          get().removeFromCart(productId, size, color);
+          get().removeFromCart(productId, size, color, length);
           return;
         }
 
@@ -202,6 +204,7 @@ setAuthState: (isLoggedIn, userId) => {
                 quantity,
                 selectedSize: size,
                 selectedColor: color,
+                selectedLength: length,
               }),
             });
 
@@ -214,7 +217,7 @@ setAuthState: (isLoggedIn, userId) => {
         } else {
           set((state) => ({
             cartItems: state.cartItems.map((item) =>
-              item.id === productId && item.selectedSize === size && item.selectedColor === color
+              item.id === productId && item.selectedSize === size && item.selectedColor === color && item.selectedLength === length
                 ? { ...item, quantity }
                 : item
             ),

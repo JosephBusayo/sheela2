@@ -50,7 +50,12 @@ interface ProductFromDb {
   category: {
     name: string;
   };
+  subCategory: {
+    name: string;
+  } | null;
   images: { url: string }[];
+  sizes: { size: string }[];
+  colors: { color: string }[];
 }
 
 export default function CategoryPageClient({ category }: { category: string }) {
@@ -63,6 +68,28 @@ export default function CategoryPageClient({ category }: { category: string }) {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortOption, setSortOption] = useState("Default sorting");
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string | null>(
+    null
+  );
+
+  const handleClearFilters = () => {
+    setSelectedSubCategory(null);
+    setPriceRange([100, 400]);
+    setProducts(originalProducts);
+  };
+
+  const handleSubCategoryClick = (subCategoryName: string) => {
+    if (selectedSubCategory === subCategoryName) {
+      setSelectedSubCategory(null);
+      setProducts(originalProducts);
+    } else {
+      setSelectedSubCategory(subCategoryName);
+      const filteredProducts = originalProducts.filter(
+        (product) => product.subCategory === subCategoryName
+      );
+      setProducts(filteredProducts);
+    }
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -77,6 +104,7 @@ export default function CategoryPageClient({ category }: { category: string }) {
 
         const products = productsFromDb.map((product: ProductFromDb & { createdAt: string; _count: { cartItems: number; orderItems: number } }) => ({
           ...product,
+          price: product.price.toString(),
           category: {
             name: product.category.name.toLowerCase() as
               | "women"
@@ -85,14 +113,17 @@ export default function CategoryPageClient({ category }: { category: string }) {
               | "unisex"
               | "fabrics",
           },
+          subCategory: product.subCategory?.name,
           originalPrice:
             product.originalPrice === null ? undefined : product.originalPrice,
           description:
             product.description === null ? undefined : product.description,
-          images: product.images.map((image: { url: string }) => image.url),
+          images: product.images ? product.images.map((image: { url: string }) => image.url) : [],
+          sizes: product.sizes ? product.sizes.map((size: { size: string }) => size.size) : [],
+          colors: product.colors ? product.colors.map((color: { color: string }) => color.color.toLowerCase()) : [],
         })) as ProductWithCounts[];
-        setProducts(products);
         setOriginalProducts(products);
+        setProducts(products);
         setTotalProducts(totalProducts);
       } catch (error) {
         console.error("Failed to fetch products:", error);
@@ -189,6 +220,7 @@ export default function CategoryPageClient({ category }: { category: string }) {
                 <SheetTitle className="text-lg font-semibold">
                   {category.toUpperCase()} STYLES
                 </SheetTitle>
+                
               </SheetHeader>
               {/* Category Links */}
               <div className="mt-4 space-y-3 text-sm font-extralight">
@@ -197,9 +229,16 @@ export default function CategoryPageClient({ category }: { category: string }) {
                     key={subCategory.id}
                     className="flex flex-row items-center gap-2"
                   >
-                    <Link href="#" className="block hover:underline">
+                    <button
+                      onClick={() => handleSubCategoryClick(subCategory.name)}
+                      className={`block hover:underline ${
+                        selectedSubCategory === subCategory.name
+                          ? "font-bold text-green-900"
+                          : ""
+                      }`}
+                    >
                       {subCategory.name}
-                    </Link>
+                    </button>
                     <ChevronRightIcon className="w-4 h-4" />
                   </div>
                 ))}
@@ -219,10 +258,19 @@ export default function CategoryPageClient({ category }: { category: string }) {
                   className="[&_[data-slot=slider-range]]:bg-green-900"
                 />
 
-                <div className="flex justify-between items-center mt-3">
+                <div className="flex justify-between items-center my-3">
                   <Button
                     variant="default"
                     className="bg-green-900 hover:bg-green-800 text-white border-none rounded-none cursor-pointer"
+                    onClick={() => {
+                      const filteredProducts = originalProducts.filter(
+                        (product) => {
+                          const price = parseFloat(product.price);
+                          return price >= priceRange[0] && price <= priceRange[1];
+                        }
+                      );
+                      setProducts(filteredProducts);
+                    }}
                   >
                     Filter by Price
                   </Button>
@@ -230,6 +278,13 @@ export default function CategoryPageClient({ category }: { category: string }) {
                     Price: ${priceRange[0]} - ${priceRange[1]}
                   </span>
                 </div>
+              </div>
+              <div className="flex flex-col my-2">
+                <Button variant="ghost" size="sm" onClick={handleClearFilters}
+                className="font-bold underline">
+                
+                  Clear Filter
+                </Button>
               </div>
             </SheetContent>
           </Sheet>

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Package, Globe, ShoppingCart, MessageSquare, Users } from 'lucide-react';
+import { Package, Globe, ShoppingCart, MessageSquare, Users, ClipboardCheck, DollarSign, HourglassIcon, Shirt } from 'lucide-react';
 import Image from 'next/image';
 import { UserButton, UserProfile } from '@clerk/nextjs';
 import { useUser } from '@clerk/nextjs';
@@ -12,7 +12,9 @@ interface DashboardStats {
   numListings: number;
   itemsInCart: number;
   websiteVisits: number;
-  whatsappMessages: number;
+  completedOrders: number;
+  pendingOrders: number;
+  monthlySales: number;
 }
 
 export const DashboardHeader: React.FC = () => {
@@ -40,15 +42,10 @@ export const DashboardHeader: React.FC = () => {
         {
           title: "Number of listings",
           value: stats?.numListings ?? "...",
-          Icon: Package,
+          Icon: Shirt,
           color: "text-bt-green",
         },
-        {
-          title: "Number of website visits",
-          value: stats?.websiteVisits ?? "...",
-          Icon: Globe,
-          color: "text-green-600",
-        },
+       
         {
           title: "Items in cart for all users",
           value: stats?.itemsInCart ?? "...",
@@ -56,11 +53,24 @@ export const DashboardHeader: React.FC = () => {
           color: "text-orange-600",
         },
         {
-          title: "Number of whatsapp messages",
-          value: stats?.whatsappMessages ?? "...",
-          Icon: MessageSquare,
+          title: "Number of completed orders",
+          value: stats?.completedOrders ?? "...",
+          Icon: ClipboardCheck,
           color: "text-purple-600",
         },
+        {
+           title: "Number of pending orders",
+          value: stats?.pendingOrders ?? "...",
+          Icon: HourglassIcon,
+          color: "text-purple-600",
+        },
+        {
+           title: "Sales made this month",
+          value: stats?.monthlySales ? `$${stats.monthlySales.toFixed(2)}` : "...",
+          Icon: DollarSign,
+          color: "text-purple-600",
+        }
+
       ];
 
   return (
@@ -83,7 +93,7 @@ export const DashboardHeader: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statsCards.map((stat, index) => (
             <Card key={index}>
                 <CardContent className="p-4 md:p-6">
@@ -97,7 +107,7 @@ export const DashboardHeader: React.FC = () => {
                 </CardContent>
             </Card>
         ))}
-      </div> */}
+      </div>
     </div>
   );
 };

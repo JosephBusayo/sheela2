@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import FsLightbox from "fslightbox-react";
-import colorNamer from "color-namer";
+import colorNames from "1500-color-names";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Navigation, Thumbs } from "swiper/modules";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,12 @@ import SizeGuide from "@/components/SizeGuide";
 import { useStore } from "../../../../../stores/useStore";
 import { useUser, RedirectToSignIn } from "@clerk/nextjs";
 import { FabricSamplesDialog } from "@/components/FabricSamplesDialog";
+
+// Create a lowercase mapping for case-insensitive color name lookup
+const lowerCaseColorNames = Object.keys(colorNames).reduce((acc, key) => {
+  acc[key.toLowerCase()] = (colorNames as Record<string, string>)[key];
+  return acc;
+}, {} as Record<string, string>);
 
 // Get WhatsApp number from env
 const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER;
@@ -73,6 +79,7 @@ interface ProductPageClientProps {
 const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarProducts }) => {
   
   const { isSignedIn } = useUser();
+  const router = useRouter();
   const pathname = usePathname();
   const category = pathname.split("/")[2];
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
@@ -88,10 +95,14 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
 
   const getColorHex = (colorName: string) => {
     try {
-      const names = colorNamer(colorName);
-      return names.ntc[0].hex;
+      const lowerCaseColorName = colorName.toLowerCase();
+      const hex = lowerCaseColorNames[lowerCaseColorName];
+      if (hex) {
+        return hex;
+      }
+      return '000000'; // Default to black if color name is not found
     } catch (e) {
-      return '#000000'; // Default to black if color name is not found
+      return '000000'; // Default to black if color name is not found
     }
   };
 
@@ -114,33 +125,34 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
       sales: product.sales,
     };
     try {
-      await addToCart(productToAdd, selectedSize, selectedColor, quantity);
+      await addToCart(productToAdd, selectedSize, selectedColor, quantity, selectedLength);
       toast.success(`${product.name} has been added to your cart.`);
     } catch (e) {
       toast.error('Failed to add to cart');
     }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!isSignedIn) {
       setShouldRedirectToSignIn(true);
       return;
     }
-    if (!whatsappNumber) {
-      toast.error("WhatsApp number not configured.");
-      return;
+    
+    const productToAdd = {
+      ...product,
+      images: product.images.map((image) => image.url),
+      sizes: product.sizes?.map((s) => s.size) || [],
+      colors: product.colors?.map((c) => c.color) || [],
+      category: { name: category as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics' },
+      createdAt: product.createdAt,
+      sales: product.sales,
+    };
+    try {
+      await addToCart(productToAdd, selectedSize, selectedColor, quantity, selectedLength);
+      router.push("/checkout");
+    } catch (e) {
+      toast.error('Failed to add to cart');
     }
-    const message = `Hello, I would like to place an order:\n
-Product: ${product.name}
-Price: ${product.price}
-Quantity: ${quantity}
-Size: ${selectedSize.toUpperCase()}
-Color: ${selectedColor}
-Length: ${selectedLength}
-Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
-
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
   };
 
   if (shouldRedirectToSignIn) {
@@ -217,7 +229,7 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
           ${product.price}
         </p>
 
-        <p className="text-sm md:text-lg text-gray-600 mb-6">{product.description}</p>
+        <p className="text-sm  text-gray-600 mb-6">{product.description}</p>
 
         {/* Size Select */}
         <div className="mb-4">
@@ -270,7 +282,7 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
         {/* Color Select */}
         {product.colors && product.colors.length > 0 && (
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Select Colour</label>
+            <label className="block text-sm font-medium mb-2">Select Fabric Colour</label>
             <TooltipProvider>
               <div className="flex gap-4">
                 {product.colors.map((colorObj) => (
@@ -294,13 +306,13 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
           </div>
         )}
 
-        <div className="flex flex-row justify-end">
+        {/* <div className="flex flex-row justify-end">
            {product.fabricSamples && product.fabricSamples.length > 0 && (
           <FabricSamplesDialog fabricSamples={product.fabricSamples} />
         )}
-        </div>
+        </div> */}
 
-{/* Quantity Selector */}
+        {/* Quantity Selector */}
         <div className="flex items-center gap-3 mb-6">
           <Button
             variant="outline"

@@ -7,6 +7,8 @@ import { Heart, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { Product, useStore } from "../../stores/useStore";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import AddToCartDialog from "./AddToCartDialog";
+import { getColorHex } from "@/lib/colorUtils";
 
 interface ProductCardProps {
   product: Product;
@@ -19,13 +21,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [selectedColor, setSelectedColor] = useState(
     product.colors && product.colors.length > 0 ? product.colors[0] : ""
   );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleAddToCart = () => {
-    addToCart({ ...product, selectedColor });
-    toast.success(`${product.name} has been added to your cart.`);
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (
+      (product.sizes && product.sizes.length > 0) ||
+      (product.colors && product.colors.length > 1)
+    ) {
+      setIsDialogOpen(true);
+    } else {
+      addToCart(product, product.sizes?.[0], product.colors?.[0]);
+      toast.success(`${product.name} has been added to your cart.`);
+    }
   };
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (isInFavorites) {
       removeFromFavorites(product.id);
       toast.success(`${product.name} has been removed from your favorites.`);
@@ -36,31 +50,37 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <Link href={`/store/${product.category.name}/${product.id}`}>
-    <Card className="w-full mx-auto group p-0 border-0 rounded-none shadow-none mt-4">
-      <CardHeader className="relative p-0 m-0">
-        {product.images && product.images.length > 0 && (
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            width={400}
-            height={500}
-            className="object-cover w-full h-[250px] md:h-[400px] lg:h-[500px]"
-          />
-        )}
-       
-        <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-400">
+    <>
+      <Card className="w-full mx-auto group p-0 border-0 rounded-none shadow-none mt-4">
+        <CardHeader className="relative p-0 m-0">
+          {product.images && product.images.length > 0 && (
+            <Link href={`/store/${product.category.name}/${product.id}`}>
+              <Image
+                src={product.images[0]}
+                alt={product.name}
+                width={400}
+                height={500}
+                className="object-cover w-full h-[250px] md:h-[400px] lg:h-[500px]"
+              />
+            </Link>
+          )}
+
+          <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-400">
           <div> {product.colors && product.colors.length > 0 && (
         <div className="flex items-center space-x-2 mb-2 justify-center">
           {product.colors.map((color, index) => (
             <button
               key={`${product.id}-${color}-${index}`}
-              onClick={() => setSelectedColor(color)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSelectedColor(color);
+              }}
               className={`w-4 h-4 md:w-6 md:h-6 rounded-full border-2 cursor-pointer ${
                 selectedColor === color ? "border-black" : "border-gray-300"
               }`}
               style={{
-                backgroundColor: typeof color === "string" ? color.toLowerCase() : "transparent",
+                backgroundColor: getColorHex(color),
               }}
             ></button>
           ))}
@@ -90,30 +110,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
       </CardHeader>
       <CardContent className="py-0 px-1 text-center m-0">
-        <div className="block md:hidden mb-2">
-          {product.colors && product.colors.length > 0 && (
-        <div className="flex items-center space-x-2 mb-2 justify-center">
-          {product.colors.map((color, index) => (
-            <button
-              key={`${product.id}-${color}-${index}`}
-              onClick={() => setSelectedColor(color)}
-              className={`w-4 h-4 rounded-full border-2 cursor-pointer ${
-                selectedColor === color ? "border-black" : "border-gray-300"
-              }`}
-              style={{
-                backgroundColor: typeof color === "string" ? color.toLowerCase() : "transparent",
-              }}
-            ></button>
-          ))}
-        </div>
-        )}
-        </div>
-       
-        <CardTitle className="text-xs  md:text-lg font-medium">{product.name.toUpperCase()}</CardTitle>
+        <Link href={`/store/${product.category.name}/${product.id}`}>
+          <CardTitle className="text-xs md:text-lg font-medium">{product.name.toUpperCase()}</CardTitle>
+        </Link>
         <p className="text-black text-lg">${product.price}</p>
       </CardContent>
     </Card>
-    </Link>
+    <AddToCartDialog
+        product={product}
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+      />
+    </>
   );
 };
 

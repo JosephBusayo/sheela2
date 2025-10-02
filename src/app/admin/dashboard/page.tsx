@@ -14,9 +14,11 @@ import { CategoryManagement } from '@/components/admin/dashboard/CategoryManagem
 import { FabricManagement } from '@/components/admin/dashboard/FabricManagement';
 import { toast } from 'sonner';
 import { ProductInventory } from '@/components/admin/dashboard/ProductInventory';
+import { OrderManagement } from '@/components/admin/dashboard/OrderManagement';
 
 import { ProductWithRelations, FabricSample } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
+import { Loader } from '@/components/ui/loader';
 
 //#region Types
 interface ProductImage {
@@ -541,7 +543,9 @@ const SheelaAdminDashboard: React.FC = () => {
 
   //#region Render
   if (!isLoaded) {
-    return <div>Loading...</div>;
+    return <div className='flex flex-col items-center justify-center'>
+      <Loader/>
+    </div>;
   }
 
   if (!isAdmin) {
@@ -565,12 +569,17 @@ const SheelaAdminDashboard: React.FC = () => {
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="products">Product Management</TabsTrigger>
+            <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="categories">Category Management</TabsTrigger>
-            <TabsTrigger value="fabrics">Fabric Management</TabsTrigger>
+            {/* <TabsTrigger value="fabrics">Fabric Management</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <ProductInventory />
+          </TabsContent>
+
+          <TabsContent value="orders" className="space-y-6">
+            <OrderManagement />
           </TabsContent>
 
           <TabsContent value="products" className="space-y-6">
@@ -619,13 +628,13 @@ const SheelaAdminDashboard: React.FC = () => {
             />
           </TabsContent>
 
-          <TabsContent value="fabrics">
+          {/* <TabsContent value="fabrics">
             <FabricManagement
               fabricSamples={fabricSamples}
               onAddFabric={handleAddFabric}
               onDeleteFabric={handleDeleteFabric}
             />
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>

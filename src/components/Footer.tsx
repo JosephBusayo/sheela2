@@ -17,11 +17,11 @@ const Footer: React.FC = () => {
     if (!email.trim()) return;
     
     setIsSubmitting(true);
-    // Simulate API call
+    // API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     setIsSubmitting(false);
     setEmail('');
-    // You can add toast notification here
+    //add toast notification here
   };
 
   const categories = [
@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
           
           {/* Brand Section */}
           <div className="lg:col-span-1 gap-2">
-            <Image src="/images/sheela.png" alt='logo' width={120} height={50} className='w-18 h-7 md:w-28 md:h-12' />
+            <Image src="/images/sheela.png" alt='logo' width={200} height={50} className='w-20 h-7 md:w-36 md:h-12' />
             <p className="text-gray-300 my-6 text-xs md:text-lg font-normal ">
               Handmade Elegance, Straight from Africa
             </p>
