@@ -1,5 +1,6 @@
 "use client";
 
+import type Stripe from "stripe";
 import {
   PaymentElement,
   useStripe,
@@ -7,15 +8,13 @@ import {
 } from "@stripe/react-stripe-js";
 import { useState } from "react";
 import { formatPrice } from "@/lib/utils";
-import { useStore } from "../../../stores/useStore";
-import { CartItem } from "../../../stores/useStore";
 
-export default function CheckoutForm() {
+export default function CheckoutForm({ total }: { total: number }) {
   const stripe = useStripe();
   const elements = useElements();
-  const { cartItems } = useStore();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isPaymentElementReady, setPaymentElementReady] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(
     undefined
   );
@@ -53,16 +52,11 @@ export default function CheckoutForm() {
     setIsLoading(false);
   };
 
-  const subtotal = cartItems.reduce(
-    (acc: number, item: CartItem) => acc + parseFloat(item.price) * item.quantity,
-    0
-  );
-
   return (
     <form id="payment-form" onSubmit={handleSubmit}>
-      <PaymentElement id="payment-element" />
+      <PaymentElement id="payment-element" onReady={() => setPaymentElementReady(true)} />
       <button
-        disabled={isLoading || !stripe || !elements}
+        disabled={isLoading || !stripe || !elements || !isPaymentElementReady}
         id="submit"
         className="w-full bg-blue-500 text-white py-2 rounded-md mt-4"
       >
@@ -70,7 +64,7 @@ export default function CheckoutForm() {
           {isLoading ? (
             <div className="spinner" id="spinner"></div>
           ) : (
-            `Pay ${formatPrice(subtotal)}`
+            `Pay ${formatPrice(total)}`
           )}
         </span>
       </button>

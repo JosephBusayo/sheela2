@@ -13,7 +13,7 @@ interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const CategoryProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart, addToFavorites, removeFromFavorites, isFavorite } =
     useStore();
   const isInFavorites = isFavorite(product.id);
@@ -26,8 +26,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     if (
-      (product.sizes && product.sizes.length ) ||
-      (product.colors && product.colors.length)
+      (product.sizes && product.sizes.length > 0) ||
+      (product.colors && product.colors.length > 1)
     ) {
       setIsDialogOpen(true);
     } else {
@@ -65,7 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
 
           <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-400">
-            {/* Colors section - removed extra wrapper div */}
+           
             {product.colors && product.colors.length > 0 && (
               <div className="flex items-center space-x-2 mb-2 justify-center">
                 {product.colors.map((color, index) => (
@@ -101,13 +101,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 />
                 <span className="text-xs lg:text-sm">WISHLIST</span>
               </button>
+              <Link href={`/store/${product.category.name}/${product.id}`}>
               <button
-                onClick={handleAddToCart}
+               
                 className="bg-green-800 text-white px-2 py-1 md:px-2 md:py-2 lg:px-6 lg:py-4 flex items-center gap-1 cursor-pointer"
               >
                 <ShoppingBag className="w-3 h-3 lg:w-5 lg:h-5" />
                 <span className="text-xs lg:text-sm font-light">ADD TO CART</span>
               </button>
+              </Link>
             </div>
           </div>
         </CardHeader>
@@ -131,4 +133,4 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default CategoryProductCard;

@@ -10,14 +10,17 @@ export default async function CartPage() {
  const productsRaw = await getProducts();
    // Add 'sales' property to each product
    const products = productsRaw.map(product => ({
-  ...product,
-  images: product.images.map(image => image.url),
-  sales: 0, // Default to 0
-  price: product.price.toString(),
-  category: {
-    name: product.category.name as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics'
-  }
-}));
+    ...product,
+    images: product.images.map(image => image.url),
+    sales: 0, // Default to 0
+    price: product.price.toString(),
+    category: {
+      name: product.category.name as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics'
+    },
+    // Ensure sizes and colors are passed
+    sizes: product.sizes.map(size => size.size),
+    colors: product.colors.map(color => color.color),
+  }));
   return (
     <div suppressHydrationWarning={true} className="flex flex-col overflow-x-hidden justify-center items-center px-0">
       <Header />

@@ -31,7 +31,7 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@stripe/react-stripe-js": "^5.0.0",
-    "@stripe/stripe-js": "^8.0.0",
+    "@stripe/stripe-js": "^6.0.0",
     "1500-color-names": "^1.1.1",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",

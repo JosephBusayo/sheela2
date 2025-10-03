@@ -19,11 +19,8 @@ export async function POST(request: NextRequest) {
       notes
     )
 
-    const whatsappLink = OrderService.generateWhatsAppLink(order)
-
     return NextResponse.json({
       order,
-      whatsappLink,
     })
   } catch (error) {
     console.error('Create order error:', error)

@@ -24,7 +24,7 @@ export async function GET() {
 
     const formattedItems = cartItems.map(item => ({
       ...item.product,
-      cartItemId: item.id, // Use the unique cart item ID for keys
+      cartItemId: item.id, 
       quantity: item.quantity,
       selectedSize: item.selectedSize || null,
       selectedColor: item.selectedColor || null,

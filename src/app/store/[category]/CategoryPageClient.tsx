@@ -3,7 +3,6 @@ import AdBanner from "@/components/AdBanner";
 import BreadCrumb from "@/components/BreadCrumb";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -31,6 +30,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Product } from "../../../../stores/useStore";
+import CategoryProductCard from "@/components/CategoryProductCard";
 
 type ProductWithCounts = Product & {
   createdAt: string;
@@ -333,11 +333,11 @@ export default function CategoryPageClient({ category }: { category: string }) {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 overflow-hidden">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <CategoryProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
-      
+
       <Footer />
     </div>
   );
