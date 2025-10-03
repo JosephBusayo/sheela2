@@ -9,7 +9,11 @@ export async function GET() {
     const websiteVisits = await prisma.websiteVisit.count();
 
     const completedOrders = await prisma.order.count({
-      where: { status: OrderStatus.DELIVERED },
+      where: {
+        status: {
+          in: [OrderStatus.DELIVERED, OrderStatus.SHIPPED],
+        },
+      },
     });
 
     const pendingOrders = await prisma.order.count({
@@ -17,16 +21,18 @@ export async function GET() {
     });
 
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
 
     const monthlySales = await prisma.order.aggregate({
       _sum: {
         total: true,
       },
       where: {
-        status: OrderStatus.DELIVERED,
+        status: {
+          in: [OrderStatus.DELIVERED, OrderStatus.SHIPPED],
+        },
         createdAt: {
-          gte: startOfMonth,
+          gte: thirtyDaysAgo,
         },
       },
     });

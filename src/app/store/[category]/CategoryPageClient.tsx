@@ -121,6 +121,7 @@ export default function CategoryPageClient({ category }: { category: string }) {
           images: product.images ? product.images.map((image: { url: string }) => image.url) : [],
           sizes: product.sizes ? product.sizes.map((size: { size: string }) => size.size) : [],
           colors: product.colors ? product.colors.map((color: { color: string }) => color.color.toLowerCase()) : [],
+          sales: 0,
         })) as ProductWithCounts[];
         setOriginalProducts(products);
         setProducts(products);

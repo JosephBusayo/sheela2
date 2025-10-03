@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
-import { ShoppingBag, Lock } from "lucide-react";
+import { ShoppingBag, Lock, X } from "lucide-react";
 
 import { useStore } from "../../../stores/useStore";
 import { formatPrice } from "@/lib/utils";
@@ -18,7 +18,7 @@ const stripePromise = loadStripe(
 const CheckoutPageClient = () => {
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const { cartItems } = useStore();
+  const { cartItems, removeFromCart } = useStore();
 
   useEffect(() => {
     if (!cartItems || cartItems.length === 0) {
@@ -50,7 +50,7 @@ const CheckoutPageClient = () => {
         console.error("Error creating payment intent:", error);
         setIsLoading(false);
       });
-  }, []);
+  }, [cartItems]);
 
   const appearance = {
     theme: "stripe" as const,
@@ -77,7 +77,7 @@ const CheckoutPageClient = () => {
 
   const shipping = 0; // Free shipping
   const tax = subtotal * 0.1; // 10% tax
-  const total = subtotal + shipping + tax;
+  const total = subtotal + shipping;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
@@ -110,7 +110,7 @@ const CheckoutPageClient = () => {
                 {cartItems.map((item: CartItem, i) => (
                   <div
                     key={i}
-                    className="flex justify-between items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                    className="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-900">
@@ -128,6 +128,20 @@ const CheckoutPageClient = () => {
                         {formatPrice(parseFloat(item.price))} each
                       </p>
                     </div>
+                    <button
+                      onClick={() =>
+                        removeFromCart(
+                          item.id,
+                          item.selectedSize,
+                          item.selectedColor,
+                          item.selectedLength
+                        )
+                      }
+                      className="ml-4 text-gray-400 hover:text-red-500"
+                      aria-label={`Remove ${item.name} from cart`}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -144,10 +158,10 @@ const CheckoutPageClient = () => {
                     {shipping === 0 ? "FREE" : formatPrice(shipping)}
                   </span>
                 </div>
-                <div className="flex justify-between text-gray-700">
+                {/* <div className="flex justify-between text-gray-700">
                   <span>Tax (10%)</span>
                   <span className="font-medium">{formatPrice(tax)}</span>
-                </div>
+                </div> */}
                 <div className="flex justify-between text-xl font-bold text-gray-900 pt-3 border-t border-gray-300">
                   <span>Total</span>
                   <span>{formatPrice(total)}</span>

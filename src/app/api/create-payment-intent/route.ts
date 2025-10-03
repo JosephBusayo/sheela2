@@ -80,6 +80,7 @@ export async function POST(req: Request) {
               price: parseFloat(item.price),
               selectedSize: item.selectedSize,
               selectedColor: item.selectedColor,
+              selectedLength: item.selectedLength,
             })),
           },
         },

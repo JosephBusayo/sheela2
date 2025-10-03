@@ -30,6 +30,7 @@ const SearchPageClient: React.FC<SearchPageClientProps> = ({
         | "unisex"
         | "fabrics",
     },
+    sales: 0, // Add the missing 'sales' property with a default value
   }));
 
   return (

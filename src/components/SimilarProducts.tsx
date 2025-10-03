@@ -1,16 +1,9 @@
 import React from "react";
 import ProductGrid from "./ProductGrid";
-import { Product } from "@prisma/client";
+import { Product } from "../../stores/useStore";
 
 type SimilarProductsProps = {
-  products: (Omit<Product, "originalPrice" | "description"> & {
-    images: string[];
-    category: {
-      name: "women" | "men" | "kids" | "unisex" | "fabrics";
-    };
-    originalPrice?: number;
-    description?: string;
-  })[];
+  products: Product[];
 };
 
 const SimilarProducts = ({ products }: SimilarProductsProps) => {
@@ -20,7 +13,7 @@ const SimilarProducts = ({ products }: SimilarProductsProps) => {
         You Might Also Like
       </h1>
       <div className="mt-6 px-4 lg:px-0">
-        <ProductGrid products={products} className="" />
+        <ProductGrid products={products}  />
       </div>
     </div>
   );

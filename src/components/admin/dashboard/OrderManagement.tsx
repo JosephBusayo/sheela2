@@ -8,18 +8,26 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Loader } from '@/components/ui/loader';
+import { Button } from '@/components/ui/button';
 
 interface OrderItem {
   id: string;
   quantity: number;
+  selectedSize: string | null;
+  selectedColor: string | null;
+  selectedLength: string | null;
   product: {
     name: string;
     price: string;
+    size?: string;
+    length?: string;
+    color?: string;
   };
 }
 
 interface Order {
   id: string;
+  orderNumber: string;
   userId: string;
   status: string;
   total: number;
@@ -35,6 +43,7 @@ interface Order {
 export const OrderManagement: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
@@ -101,38 +110,84 @@ export const OrderManagement: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Order ID</TableHead>
+              <TableHead>Order Number</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Current Status</TableHead>
+              <TableHead>Change Status</TableHead>
               <TableHead className="text-right">Total</TableHead>
+              <TableHead>Details</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {orders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id.substring(0, 8)}...</TableCell>
-                <TableCell>{order.user.firstName || ''} {order.user.lastName || order.user.email}</TableCell>
-                <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
-                <TableCell>
-                  <Select
-                    value={order.status}
-                    onValueChange={(newStatus) => handleStatusChange(order.id, newStatus)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Pending">Pending</SelectItem>
-                      <SelectItem value="Processing">Processing</SelectItem>
-                      <SelectItem value="Shipped">Shipped</SelectItem>
-                      <SelectItem value="Delivered">Delivered</SelectItem>
-                      <SelectItem value="Cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell className="text-right">${(order.total / 100).toFixed(2)}</TableCell>
-              </TableRow>
+              <React.Fragment key={order.id}>
+                <TableRow>
+                  <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                  <TableCell>{order.user.firstName || ''} {order.user.lastName || order.user.email}</TableCell>
+                  <TableCell>{format(new Date(order.createdAt), 'PPP')}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{order.status}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={order.status}
+                      onValueChange={(newStatus) => handleStatusChange(order.id, newStatus)}
+                    >
+                      <SelectTrigger className="w-[130px]">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="Processing">Processing</SelectItem>
+                        <SelectItem value="Shipped">Shipped</SelectItem>
+                        <SelectItem value="Delivered">Delivered</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="text-right">${(order.total).toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setExpandedOrderId(expandedOrderId === order.id ? null : order.id)}
+                    >
+                      {expandedOrderId === order.id ? 'Hide' : 'View'} Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                {expandedOrderId === order.id && (
+                  <TableRow>
+                    <TableCell colSpan={7}>
+                      <div className="p-4 bg-muted/50 rounded-md">
+                        <h4 className="font-semibold mb-2">Order Items</h4>
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Product</TableHead>
+                              <TableHead>Quantity</TableHead>
+                              <TableHead>Size</TableHead>
+                              <TableHead>Length</TableHead>
+                              <TableHead>Color</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {order.items.map((item) => (
+                              <TableRow key={item.id}>
+                                <TableCell>{item.product.name}</TableCell>
+                                <TableCell>{item.quantity}</TableCell>
+                                <TableCell>{item.selectedSize || 'N/A'}</TableCell>
+                                <TableCell>{item.selectedLength || 'N/A'}</TableCell>
+                                <TableCell>{item.selectedColor || 'N/A'}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>

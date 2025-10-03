@@ -1,4 +1,5 @@
 // stores/useStore.ts - Updated with Clerk integration
+import { toast } from 'sonner';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -210,6 +211,7 @@ setAuthState: (isLoggedIn, userId) => {
 
             if (response.ok) {
               await get().syncWithDatabase();
+              toast.success('Cart updated');
             }
           } catch (error) {
             console.error('Failed to update quantity:', error);
