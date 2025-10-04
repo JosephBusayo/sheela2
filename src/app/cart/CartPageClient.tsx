@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useStore } from "../../../stores/useStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import { Minus, Plus } from "lucide-react";
 
 export default function CartPageClient() {
   const { cartItems, cartTotal, updateQuantity, removeFromCart } = useStore();
+  const router = useRouter();
 
   return (
     <div className="container mx-auto px-4 py-8 mt-10">
@@ -37,7 +39,7 @@ export default function CartPageClient() {
                 </TableHeader>
                 <TableBody>
                   {cartItems.map((item) => (
-                    <TableRow key={item.id}>
+                    <TableRow key={item.cartItemId}>
                       <TableCell className="flex items-center">
                         <Image
                           src={item.images[0]}
@@ -51,6 +53,12 @@ export default function CartPageClient() {
                           <p className="text-sm text-gray-500">
                             Size: {item.selectedSize}
                           </p>
+                          <p className="text-sm text-gray-500">
+                            Color: {item.selectedColor}
+                          </p>
+                           <p className="text-sm text-gray-500">
+                            Length: {item.selectedLength}
+                          </p>
                         </div>
                       </TableCell>
                       <TableCell>{item.price}</TableCell>
@@ -59,11 +67,14 @@ export default function CartPageClient() {
                           <Button
                             variant="outline"
                             size="icon"
+                            disabled={item.quantity === 1}
                             onClick={() =>
                               updateQuantity(
                                 item.id,
                                 item.quantity - 1,
-                                item.selectedSize
+                                item.selectedSize,
+                                item.selectedColor,
+                                item.selectedLength
                               )
                             }
                           >
@@ -77,7 +88,9 @@ export default function CartPageClient() {
                               updateQuantity(
                                 item.id,
                                 item.quantity + 1,
-                                item.selectedSize
+                                item.selectedSize,
+                                item.selectedColor,
+                                item.selectedLength
                               )
                             }
                           >
@@ -85,13 +98,18 @@ export default function CartPageClient() {
                           </Button>
                         </div>
                       </TableCell>
-                      <TableCell>{item.price}</TableCell>
+                      <TableCell>
+                        {(
+                          parseFloat(item.price.replace(/[^0-9.-]+/g, "")) *
+                          item.quantity
+                        ).toFixed(2)}
+                      </TableCell>
                       <TableCell>
                         <Button
                           className="underline cursor-pointer"
                           variant="ghost"
                           onClick={() =>
-                            removeFromCart(item.id, item.selectedSize)
+                            removeFromCart(item.id, item.selectedSize, item.selectedColor, item.selectedLength)
                           }
                         >
                           Remove
@@ -102,9 +120,10 @@ export default function CartPageClient() {
                 </TableBody>
               </Table>
             </div>
+            {/* Mobile view */}
             <div className="md:hidden">
               {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center border-b py-4">
+                <div key={item.cartItemId} className="flex items-center border-b py-4">
                   <Image
                     src={item.images[0]}
                     alt={item.name}
@@ -117,16 +136,25 @@ export default function CartPageClient() {
                     <p className="text-sm text-gray-500">
                       Size: {item.selectedSize}
                     </p>
+                     <p className="text-sm text-gray-500">
+                            Color: {item.selectedColor}
+                          </p>
+                           <p className="text-sm text-gray-500">
+                            Length: {item.selectedLength}
+                          </p>
                     <p className="text-sm">{item.price}</p>
                     <div className="flex items-center mt-2">
                       <Button
                         variant="outline"
                         size="icon"
+                        disabled={item.quantity === 1}
                         onClick={() =>
                           updateQuantity(
                             item.id,
                             item.quantity - 1,
-                            item.selectedSize
+                            item.selectedSize,
+                            item.selectedColor,
+                            item.selectedLength
                           )
                         }
                       >
@@ -140,7 +168,9 @@ export default function CartPageClient() {
                           updateQuantity(
                             item.id,
                             item.quantity + 1,
-                            item.selectedSize
+                            item.selectedSize,
+                            item.selectedColor,
+                            item.selectedLength
                           )
                         }
                       >
@@ -150,13 +180,16 @@ export default function CartPageClient() {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-sm">
-                      {item.price}
+                      {(
+                        parseFloat(item.price.replace(/[^0-9.-]+/g, "")) *
+                        item.quantity
+                      ).toFixed(2)}
                     </p>
                     <Button
                       className="underline cursor-pointer text-xs"
                       variant="ghost"
                       onClick={() =>
-                        removeFromCart(item.id, item.selectedSize)
+                        removeFromCart(item.id, item.selectedSize, item.selectedColor, item.selectedLength)
                       }
                     >
                       Remove
@@ -183,36 +216,13 @@ export default function CartPageClient() {
                     Ships in 10 - 14 Days
                   </p>
                 </div>
-                <p className="text-sm font-semibold text-black border bg-[#293A2826] p-3 rounded-none mb-6 capitalize">
-                  Please note that the Place Order button redirects you to
-                  WhatsApp so you can discuss with Sheela and also ask
-                  necessary questions.
-                </p>
+                
               </div>
               <Button
                 className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 w-full"
                 onClick={() => {
                   if (cartItems.length === 0) return;
-                  
-                  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER;
-                  // Format cart items for WhatsApp
-                  const itemsText = cartItems
-                    .map(
-                      (item, idx) =>
-                        `${idx + 1}. ${item.name} (Size: ${item.selectedSize || "N/A"}) x${item.quantity} - ₦${item.price} `
-                    )
-                    .join("\n");
-                  const message =
-                    `Hello, I would like to place an order:\n\n` +
-                    itemsText 
-
-
-
-                  const encodedMessage = encodeURIComponent(message);
-                  window.open(
-                    `https://wa.me/${whatsappNumber}?text=${encodedMessage}`,
-                    "_blank"
-                  );
+                  router.push("/checkout");
                 }}
               >
                 Place Order

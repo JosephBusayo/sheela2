@@ -18,15 +18,22 @@ export async function GET() {
       where: { userId: userId },
       include: {
         product: {
-          include: { images: true }
-        }
-      }
-    })
+          include: {
+            images: true,
+            sizes: true,
+            colors: true,
+            category: true,
+          },
+        },
+      },
+    });
 
-    const formattedFavorites = favorites.map(fav => ({
+    const formattedFavorites = favorites.map((fav) => ({
       ...fav.product,
-      images: fav.product.images.map(img => img.url),
-    }))
+      images: fav.product.images.map((img) => img.url),
+      sizes: fav.product.sizes.map((s) => s.size),
+      colors: fav.product.colors.map((c) => c.color),
+    }));
 
     return NextResponse.json({ favorites: formattedFavorites })
   } catch (error) {

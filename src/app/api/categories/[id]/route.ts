@@ -48,16 +48,25 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await prisma.category.delete({
-      where: { id: (await params).id },
-    });
+    const { id } = await params;
+    await prisma.$transaction([
+      prisma.product.deleteMany({
+        where: { categoryId: id },
+      }),
+      prisma.category.delete({
+        where: { id },
+      }),
+    ]);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Error deleting category:', error);
-     if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === 'P2003') {
         return NextResponse.json(
-          { error: 'Cannot delete category because it is still in use by products.' },
+          {
+            error:
+              'Cannot delete category because it is still in use by products.',
+          },
           { status: 409 }
         );
       }

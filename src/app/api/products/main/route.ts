@@ -4,8 +4,12 @@ import prisma from '@/lib/prisma';
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    const { images, sizes, colors, id, ...productData } = data;
+    const { images, sizes, colors, fabricSamples, id, ...productData } = data;
     
+    if (productData.subCategoryId === '') {
+      productData.subCategoryId = null;
+    }
+
     const product = await prisma.product.create({
       data: {
         ...productData,
@@ -26,11 +30,17 @@ export async function POST(req: Request) {
             color: color.color,
           })),
         },
+        fabricSamples: {
+          connect: fabricSamples.map((sample: { id: string }) => ({
+            id: sample.id,
+          })),
+        },
       },
       include: {
         images: true,
         sizes: true,
         colors: true,
+        fabricSamples: true,
       },
     });
     

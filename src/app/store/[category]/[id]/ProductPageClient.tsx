@@ -1,14 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import FsLightbox from "fslightbox-react";
+import colorNames from "1500-color-names";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Navigation, Thumbs } from "swiper/modules";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Minus, Plus } from "lucide-react";
-import { Product, ProductImage } from "@prisma/client";
+import { ProductImage } from "@prisma/client";
 import { toast } from "sonner";
+import { Product } from "../../../../../stores/useStore";
 
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -20,6 +23,13 @@ import Image from "next/image";
 import SizeGuide from "@/components/SizeGuide";
 import { useStore } from "../../../../../stores/useStore";
 import { useUser, RedirectToSignIn } from "@clerk/nextjs";
+import { FabricSamplesDialog } from "@/components/FabricSamplesDialog";
+
+// Create a lowercase mapping for case-insensitive color name lookup
+const lowerCaseColorNames = Object.keys(colorNames).reduce((acc, key) => {
+  acc[key.toLowerCase()] = (colorNames as Record<string, string>)[key];
+  return acc;
+}, {} as Record<string, string>);
 
 // Get WhatsApp number from env
 const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_NUMBER;
@@ -30,9 +40,35 @@ interface ProductSize {
   productId: string;
 }
 
-interface ProductWithImages extends Product {
+interface ProductColor {
+  id: string;
+  color: string;
+  productId: string;
+}
+
+interface FabricSample {
+  id: string;
+  name: string;
+  image: string;
+}
+
+interface ProductWithImages {
+  id: string;
+  name: string;
+  price: string;
+  originalPrice?: number | null;
   images: ProductImage[];
+  category: {
+    name: 'women' | 'men' | 'kids' | 'unisex' | 'fabrics';
+  };
+  subCategory?: string;
   sizes: ProductSize[];
+  colors: ProductColor[];
+  description?: string | null;
+  selectedColor?: string;
+  createdAt: Date;
+  sales: number;
+  fabricSamples: FabricSample[];
 }
 
 interface ProductPageClientProps {
@@ -43,6 +79,7 @@ interface ProductPageClientProps {
 const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarProducts }) => {
   
   const { isSignedIn } = useUser();
+  const router = useRouter();
   const pathname = usePathname();
   const category = pathname.split("/")[2];
   const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
@@ -51,9 +88,23 @@ const ProductPageClient: React.FC<ProductPageClientProps> = ({ product, similarP
     toggler: false,
     slide: 1,
   });
-  const [selectedFabric, setSelectedFabric] = useState<string>("same");
-  const [selectedSize, setSelectedSize] = useState<string>("xs");
+  const [selectedSize, setSelectedSize] = useState<string>(product.sizes?.[0]?.size || "xs");
+  const [selectedColor, setSelectedColor] = useState<string>(product.colors?.[0]?.color || "");
+  const [selectedLength, setSelectedLength] = useState<string>("MEDIUM");
   const [shouldRedirectToSignIn, setShouldRedirectToSignIn] = useState(false);
+
+  const getColorHex = (colorName: string) => {
+    try {
+      const lowerCaseColorName = colorName.toLowerCase();
+      const hex = lowerCaseColorNames[lowerCaseColorName];
+      if (hex) {
+        return hex;
+      }
+      return '000000'; // Default to black if color name is not found
+    } catch (e) {
+      return '000000'; // Default to black if color name is not found
+    }
+  };
 
   function openLightboxOnSlide(number: number) {
     setLightboxController({
@@ -67,36 +118,41 @@ const { addToCart, addToFavorites, removeFromFavorites, isFavorite } = useStore(
     const productToAdd = {
       ...product,
       images: product.images.map((image) => image.url),
-      sizes: product.sizes.map((s) => s.size),
+      sizes: product.sizes?.map((s) => s.size) || [],
+      colors: product.colors?.map((c) => c.color) || [],
       category: { name: category as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics' },
+      createdAt: product.createdAt,
+      sales: product.sales,
     };
     try {
-      await addToCart(productToAdd, selectedSize, undefined, quantity, selectedFabric);
+      await addToCart(productToAdd, selectedSize, selectedColor, quantity, selectedLength);
       toast.success(`${product.name} has been added to your cart.`);
     } catch (e) {
       toast.error('Failed to add to cart');
     }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!isSignedIn) {
       setShouldRedirectToSignIn(true);
       return;
     }
-    if (!whatsappNumber) {
-      toast.error("WhatsApp number not configured.");
-      return;
+    
+    const productToAdd = {
+      ...product,
+      images: product.images.map((image) => image.url),
+      sizes: product.sizes?.map((s) => s.size) || [],
+      colors: product.colors?.map((c) => c.color) || [],
+      category: { name: category as 'women' | 'men' | 'kids' | 'unisex' | 'fabrics' },
+      createdAt: product.createdAt,
+      sales: product.sales,
+    };
+    try {
+      await addToCart(productToAdd, selectedSize, selectedColor, quantity, selectedLength);
+      router.push("/checkout");
+    } catch (e) {
+      toast.error('Failed to add to cart');
     }
-    const message = `Hello, I would like to place an order:\n
-Product: ${product.name}
-Price: ${product.price}
-Quantity: ${quantity}
-Size: ${selectedSize.toUpperCase()}
-Fabric: ${selectedFabric === "same" ? "Maintain Same Fabric" : "Custom Fabric"}
-Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
-
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
   };
 
   if (shouldRedirectToSignIn) {
@@ -106,7 +162,7 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
   return (
     
     
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:max-w-7xl mx-auto mt-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 lg:max-w-7xl mx-auto mt-6">
       {/* LEFT: Product Gallery */}
       <div className="flex flex-col md:flex-row gap-4 items-start">
         {/* Thumbnails */}
@@ -125,7 +181,7 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
             freeMode={true}
             watchSlidesProgress={true}
             modules={[FreeMode, Navigation, Thumbs]}
-            className="h-24 md:h-[600px] w-full"
+            className="h-24 md:h-[600px] lg:[700px] w-full"
           >
             {product.images.map((image) => (
               <SwiperSlide key={image.id}>
@@ -141,7 +197,7 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
 
         {/* Main Image */}
         <div className="flex-1 w-full">
-          <div className="w-full h-[350px] md:w-[450px] md:h-[600px] lg:w-[520px] lg:h-[600px]">
+          <div className="w-full h-[350px] md:w-[300px] md:h-[450px] lg:w-[480px] lg:h-[600px]">
             <Swiper
               style={{ "--swiper-navigation-color": "#000" } as any}
               spaceBetween={5}
@@ -167,92 +223,126 @@ Product Link: ${typeof window !== "undefined" ? window.location.href : ""}`;
         </div>
       </div>
       {/* RIGHT: Product Info */}
-      <div className="lg:ml-20">
-        <h1 className="text-2xl font-semibold mb-2">{product.name}</h1>
-        <p className="text-lg font-bold text-gray-800 mb-4">
-          ₦{product.price}
+      <div className="md:ml-8 lg:ml-16">
+        <h1 className="md:text-2xl text-xl font-semibold mb-2">{product.name}</h1>
+        <p className="md:text-lg font-normal text-gray-800 mb-4">
+          ${product.price}
         </p>
 
-        <p className="text-sm text-gray-600 mb-6">{product.description}</p>
-          {/* Fabric Select */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Select Fabric Type</label>
-          <Select value={selectedFabric} onValueChange={setSelectedFabric}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Maintain Same Fabric" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="same">Maintain Same Fabric</SelectItem>
-              <SelectItem value="custom">Custom Fabric</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <p className="text-sm  text-gray-600 mb-6">{product.description}</p>
 
         {/* Size Select */}
         <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
             <label className="block text-sm font-medium">Select Size</label>
             <SizeGuide />
-            
           </div>
-          <Select value={selectedSize} onValueChange={setSelectedSize}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Size" />
-            </SelectTrigger>
-            <SelectContent>
-              {product.sizes && product.sizes.length > 0 ? (
-                product.sizes.map((sizeObj) => (
-                  <SelectItem key={sizeObj.id} value={sizeObj.size}>
-                    {sizeObj.size.toUpperCase()}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="no-sizes" disabled>
-                  No sizes available
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            {product.sizes?.map((sizeObj) => (
+              <Button
+                key={sizeObj.id}
+                variant={selectedSize === sizeObj.size ? "default" : "outline"}
+                onClick={() => setSelectedSize(sizeObj.size)}
+                className="rounded-none text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
+              >
+                {sizeObj.size.toUpperCase()}
+              </Button>
+            ))}
+          </div>
         </div>
 
-{/* Quantity Selector */}
+        {/* Length Select */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Length</label>
+          <div className="flex gap-2">
+            <Button
+              variant={selectedLength === "MEDIUM" ? "default" : "outline"}
+              onClick={() => setSelectedLength("MEDIUM")}
+              className="rounded-none text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
+            >
+              MEDIUM
+            </Button>
+            <Button
+              variant={selectedLength === "REGULAR" ? "default" : "outline"}
+              onClick={() => setSelectedLength("REGULAR")}
+              className="rounded-none text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
+            >
+              REGULAR
+            </Button>
+            <Button
+              variant={selectedLength === "TALL" ? "default" : "outline"}
+              onClick={() => setSelectedLength("TALL")}
+              className="rounded-none text-xs md:text-sm px-2 md:px-4 py-1 md:py-2"
+            >
+              TALL
+            </Button>
+          </div>
+        </div>
+
+        {/* Color Select */}
+        {product.colors && product.colors.length > 0 && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Select Fabric Colour</label>
+            <TooltipProvider>
+              <div className="flex gap-4">
+                {product.colors.map((colorObj) => (
+                  <Tooltip key={colorObj.id}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => setSelectedColor(colorObj.color)}
+                        className={`md:w-8 md:h-8 w-4 h-4 rounded-none cursor-pointer border-2 ${
+                          selectedColor === colorObj.color ? "border-b-gray-600" : "border-transparent"
+                        }`}
+                        style={{ backgroundColor: `#${getColorHex(colorObj.color)}` }}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{colorObj.color.toLowerCase()}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
+          </div>
+        )}
+
+        {/* <div className="flex flex-row justify-end">
+           {product.fabricSamples && product.fabricSamples.length > 0 && (
+          <FabricSamplesDialog fabricSamples={product.fabricSamples} />
+        )}
+        </div> */}
+
+        {/* Quantity Selector */}
         <div className="flex items-center gap-3 mb-6">
           <Button
             variant="outline"
             size="icon"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
           >
-            <Minus className="h-4 w-4" />
+            <Minus className="md:h-4 md:w-4 h-3 w-3" />
           </Button>
-          <span className="text-lg font-medium">{quantity}</span>
+          <span className="md:text-lg text-sm font-medium">{quantity}</span>
           <Button
             variant="outline"
             size="icon"
             onClick={() => setQuantity(quantity + 1)}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="md:h-4 h-3 w-3 md:w-4" />
           </Button>
         </div>
-         {/* Shipping Info */}
-        <p className="text-sm font-semibold mb-2">Made-To-Order Only.</p>
-        <div className="flex flex-row items-center mb-6 gap-2">
-          <Image src={"/package.svg"} alt="shipping" width={16} height={16}/>  
-          <p className="text-sm text-gray-600 ">Ships in 10 - 14 Days</p>
-        </div>
         
-        <p className="text-sm font-semibold text-black border bg-[#293A2826] p-3 rounded-none mb-6 capitalize">
-          Please note that the Place Order button redirects you to WhatsApp so you can 
-          discuss with Sheela and also ask necessary questions.
-        </p>
+       
+   
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
-          <Button variant="outline" className="rounded-none cursor-pointer flex-1" onClick={handleAddToCart}>
+          <Button variant="outline" className="rounded-none cursor-pointer flex-1 uppercase" onClick={handleAddToCart}>
             <Image src={"/bag-2.svg"} alt="package" width={14} height={14} />
             Add to Cart
           </Button>
-          <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 flex-1" onClick={handlePlaceOrder}>Place Order</Button>
+          <Button className="bg-bt-green hover:bg-bt-green/90 rounded-none cursor-pointer px-8 flex-1 uppercase" onClick={handlePlaceOrder}>Buy Now</Button>
         </div>
+       
       </div>
       <FsLightbox
         toggler={lightboxController.toggler}

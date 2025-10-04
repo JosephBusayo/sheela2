@@ -9,7 +9,10 @@ export async function getProductbyId(id: string) {
     },
     include: {
       images: true,
-      sizes: true
+      sizes: true,
+      colors: true,
+      fabricSamples: true,
+      category: true
     }
   });
   if(!product) throw new Error('Product not found');
@@ -28,6 +31,8 @@ export async function getSimilarProducts(categoryId: string, currentProductId: s
       images: true,
       category: true,
       sizes: true,
+      colors: true,
+      fabricSamples: true,
     },
     take: 4,
   });

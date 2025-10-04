@@ -24,9 +24,11 @@ export async function GET() {
 
     const formattedItems = cartItems.map(item => ({
       ...item.product,
+      cartItemId: item.id, 
       quantity: item.quantity,
       selectedSize: item.selectedSize || null,
       selectedColor: item.selectedColor || null,
+      selectedLength: item.selectedLength || null,
       images: item.product.images.map(img => img.url),
     }))
 
@@ -44,7 +46,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { productId, quantity, selectedSize, selectedColor } = await request.json()
+    const { productId, quantity, selectedSize, selectedColor, selectedLength } = await request.json()
 
     if (!productId) {
       return NextResponse.json({ error: 'productId is required' }, { status: 400 })
@@ -61,6 +63,7 @@ export async function POST(request: NextRequest) {
 
     const normalizedSize = selectedSize ?? null
     const normalizedColor = selectedColor ?? null
+    const normalizedLength = selectedLength ?? null
 
     const existing = await prisma.cartItem.findFirst({
       where: {
@@ -68,6 +71,7 @@ export async function POST(request: NextRequest) {
         productId,
         selectedSize: normalizedSize,
         selectedColor: normalizedColor,
+        selectedLength: normalizedLength,
       },
       include: { product: { include: { images: true } } },
     })
@@ -87,6 +91,7 @@ export async function POST(request: NextRequest) {
           quantity: quantity || 1,
           selectedSize: normalizedSize,
           selectedColor: normalizedColor,
+          selectedLength: normalizedLength,
         },
         include: { product: { include: { images: true } } },
       })
@@ -97,6 +102,7 @@ export async function POST(request: NextRequest) {
       quantity: cartItem.quantity,
       selectedSize: cartItem.selectedSize || null,
       selectedColor: cartItem.selectedColor || null,
+      selectedLength: cartItem.selectedLength || null,
       images: cartItem.product.images.map(img => img.url),
     })
   } catch (error: any) {
@@ -113,7 +119,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { productId, quantity, selectedSize, selectedColor } = await request.json()
+    const { productId, quantity, selectedSize, selectedColor, selectedLength } = await request.json()
 
     if (!productId || typeof quantity !== 'number') {
       return NextResponse.json({ error: 'productId and quantity are required' }, { status: 400 })
@@ -121,6 +127,7 @@ export async function PATCH(request: NextRequest) {
 
     const normalizedSize = selectedSize ?? null
     const normalizedColor = selectedColor ?? null
+    const normalizedLength = selectedLength ?? null
 
     if (quantity <= 0) {
       await prisma.cartItem.deleteMany({
@@ -129,6 +136,7 @@ export async function PATCH(request: NextRequest) {
           productId,
           selectedSize: normalizedSize,
           selectedColor: normalizedColor,
+          selectedLength: normalizedLength,
         },
       })
       return NextResponse.json({ success: true })
@@ -140,6 +148,7 @@ export async function PATCH(request: NextRequest) {
         productId,
         selectedSize: normalizedSize,
         selectedColor: normalizedColor,
+        selectedLength: normalizedLength,
       },
       data: { quantity },
     })
@@ -152,6 +161,7 @@ export async function PATCH(request: NextRequest) {
           quantity,
           selectedSize: normalizedSize,
           selectedColor: normalizedColor,
+          selectedLength: normalizedLength,
         },
       })
     }
@@ -174,6 +184,7 @@ export async function DELETE(request: NextRequest) {
     const productId = searchParams.get('productId')
     const size = searchParams.get('size')
     const color = searchParams.get('color')
+    const length = searchParams.get('length')
 
     if (!productId) {
       // Clear entire cart
@@ -188,6 +199,7 @@ export async function DELETE(request: NextRequest) {
         productId,
         selectedSize: size ?? null,
         selectedColor: color ?? null,
+        selectedLength: length ?? null,
       },
     })
 

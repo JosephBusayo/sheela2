@@ -34,7 +34,7 @@ export default function WishlistPageClient() {
       ) : favorites.length === 0 ? (
         <p className="text-center">You have no favourite items.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {favorites.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
